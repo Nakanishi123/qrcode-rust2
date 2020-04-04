@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2014 kennytm
 // SPDX-FileCopyrightText: 2019 Ivan Tham
+// SPDX-FileCopyrightText: 2020 Riccardo Casatta
 // SPDX-FileCopyrightText: 2023 Nakanishi
 // SPDX-FileCopyrightText: 2024 Michael Spiegel
 // SPDX-FileCopyrightText: 2024 Shun Sakai
@@ -93,7 +94,7 @@ impl Bits {
     /// # Errors
     ///
     /// Returns [`Err`] on overflow.
-    fn push_number_checked(&mut self, n: usize, number: usize) -> QrResult<()> {
+    pub fn push_number_checked(&mut self, n: usize, number: usize) -> QrResult<()> {
         if n > 16 || number >= (1 << n) {
             Err(QrError::DataTooLong)
         } else {
