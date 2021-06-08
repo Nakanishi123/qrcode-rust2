@@ -17,6 +17,7 @@
 * https://github.com/afh[Alexis Hildebrandt]
 * https://github.com/Atul9[Atul Bhosale]
 * https://github.com/cab404[Cabia Rangris]
+* https://github.com/CodeAssemblingChicken[CodeAssemblingChicken]
 * Ethan Pailes
 * https://github.com/aignas[Ignas Anikevicius]
 * https://github.com/igor-raits[Igor Gnatenko]

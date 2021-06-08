@@ -16,6 +16,10 @@ project adheres to https://semver.org/[Semantic Versioning].
 
 == {compare-url}/v0.16.1\...HEAD[Unreleased]
 
+=== Added
+
+* Add `Renderer::quiet_zone_size` ({pull-request-url}/35[#35])
+
 === Changed
 
 * Make `Bits::push_number_checked` public ({pull-request-url}/34[#34])

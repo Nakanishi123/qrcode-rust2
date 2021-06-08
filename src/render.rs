@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2017 kennytm
 // SPDX-FileCopyrightText: 2020 Vladimir Serov
+// SPDX-FileCopyrightText: 2021 CodeAssemblingChicken
 // SPDX-FileCopyrightText: 2024 Alexis Hildebrandt
 // SPDX-FileCopyrightText: 2024 Michael Spiegel
 // SPDX-FileCopyrightText: 2024 Shun Sakai
@@ -136,6 +137,17 @@ impl<'a, P: Pixel> Renderer<'a, P> {
     #[inline]
     pub const fn light_color(&mut self, color: P) -> &mut Self {
         self.light_color = color;
+        self
+    }
+
+    /// Sets the size of the quiet zone in the generated image.
+    ///
+    /// If `Renderer` is constructed using
+    /// [`QrCode::render`](crate::QrCode::render), the size of the quiet zone is
+    /// 4 for normal QR code, and 2 for Micro QR code and rMQR code.
+    #[inline]
+    pub const fn quiet_zone_size(&mut self, quiet_zone: u32) -> &mut Self {
+        self.quiet_zone = quiet_zone;
         self
     }
 
