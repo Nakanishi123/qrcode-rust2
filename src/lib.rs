@@ -86,6 +86,25 @@ impl QrCode {
         Self::with_error_correction_level(data, EcLevel::M)
     }
 
+    /// Constructs a new rMQR code which automatically encodes the given data.
+    ///
+    /// This method uses the "medium" error correction level and automatically
+    /// chooses the smallest rMQR code.
+    ///
+    /// ```
+    /// use qrcode::QrCode;
+    ///
+    /// let code = QrCode::rect_micro(b"Some data").unwrap();
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns error if the rMQR code cannot be constructed, e.g. when the data
+    /// is too long.
+    pub fn rect_micro<D: AsRef<[u8]>>(data: D) -> QrResult<Self> {
+        Self::rect_micro_with_error_correction_level(data, EcLevel::M)
+    }
+
     /// Constructs a new QR code which automatically encodes the given data at a
     /// specific error correction level.
     ///
@@ -103,6 +122,26 @@ impl QrCode {
     /// is too long.
     pub fn with_error_correction_level<D: AsRef<[u8]>>(data: D, ec_level: EcLevel) -> QrResult<Self> {
         let bits = bits::encode_auto(data.as_ref(), ec_level)?;
+        Self::with_bits(bits, ec_level)
+    }
+
+    /// Constructs a new rMQR code which automatically encodes the given data at
+    /// a specific error correction level.
+    ///
+    /// This method automatically chooses the smallest rMQR code.
+    ///
+    /// ```
+    /// use qrcode::{EcLevel, QrCode};
+    ///
+    /// let code = QrCode::rect_micro_with_error_correction_level(b"Some data", EcLevel::H).unwrap();
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns error if the rMQR code cannot be constructed, e.g. when the data
+    /// is too long.
+    pub fn rect_micro_with_error_correction_level<D: AsRef<[u8]>>(data: D, ec_level: EcLevel) -> QrResult<Self> {
+        let bits = bits::encode_auto_rect_micro(data.as_ref(), ec_level)?;
         Self::with_bits(bits, ec_level)
     }
 

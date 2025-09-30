@@ -1046,3 +1046,75 @@ fn bench_find_min_version(bencher: &mut test::Bencher) {
 
 //}}}
 //------------------------------------------------------------------------------
+//{{{ Auto rMQR code's version minimization
+
+const RMQR_ALL_WIDTH: [i16; 6] = [27, 43, 59, 77, 99, 139];
+const RMQR_ALL_HEIGHT: [i16; 6] = [7, 9, 11, 13, 15, 17];
+
+/// Automatically determines the minimum version to store the data, and encode
+/// the result.
+///
+/// This method will not consider any QR code or Micro QR code versions.
+///
+/// # Errors
+///
+/// Returns `Err(QrError::DataTooLong)` if the data is too long to fit even the
+/// highest rMQR code version.
+pub fn encode_auto_rect_micro(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> {
+    let segments = Parser::new(data).collect::<Vec<Segment>>();
+    let mut possible_versions = Vec::new();
+    for width in RMQR_ALL_WIDTH {
+        for height in RMQR_ALL_HEIGHT {
+            let version = Version::RectMicro(height, width);
+            if !version.is_rect_micro() {
+                continue;
+            }
+            let opt_segments = Optimizer::new(segments.iter().copied(), version).collect::<Vec<_>>();
+            let total_len = total_encoded_len(&opt_segments, version);
+            let data_capacity = version.fetch(ec_level, &DATA_LENGTHS)?;
+            if total_len <= data_capacity {
+                possible_versions.push(version);
+                break;
+            }
+        }
+    }
+
+    let min_version = possible_versions.iter().min_by_key(|v| v.width() * v.height());
+
+    if let Some(version) = min_version {
+        let mut bits = Bits::new(*version);
+        let opt_segments = Optimizer::new(segments.iter().copied(), *version).collect::<Vec<_>>();
+        bits.reserve(total_encoded_len(&opt_segments, *version));
+        bits.push_segments(data, opt_segments.into_iter())?;
+        bits.push_terminator(ec_level)?;
+        return Ok(bits);
+    }
+    Err(QrError::DataTooLong)
+}
+
+#[cfg(test)]
+mod encode_auto_rect_micro_tests {
+    use crate::bits::encode_auto_rect_micro;
+    use crate::types::{EcLevel, Version};
+
+    #[test]
+    fn test_alpha_m() {
+        let bits = encode_auto_rect_micro(b"HELLO WORLD", EcLevel::M).unwrap();
+        assert_eq!(bits.version(), Version::RectMicro(13, 27));
+    }
+
+    #[test]
+    fn test_alpha_h() {
+        let bits = encode_auto_rect_micro(b"HELLO WORLD", EcLevel::H).unwrap();
+        assert_eq!(bits.version(), Version::RectMicro(11, 43));
+    }
+
+    #[test]
+    fn test_mixed() {
+        let bits = encode_auto_rect_micro(b"This is a mixed data test. 1234567890", EcLevel::H).unwrap();
+        assert_eq!(bits.version(), Version::RectMicro(13, 99));
+    }
+}
+
+//}}}
+//------------------------------------------------------------------------------
