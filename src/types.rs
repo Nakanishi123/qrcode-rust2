@@ -212,12 +212,12 @@ impl Version {
 
     /// Checks whether is version refers to a normal QR code.
     pub const fn is_normal(self) -> bool {
-        matches!(self, Self::Normal(_))
+        matches!(self, Self::Normal(version) if version >= 1 && version <= 40)
     }
 
     /// Checks whether is version refers to a Micro QR code.
     pub const fn is_micro(self) -> bool {
-        matches!(self, Self::Micro(_))
+        matches!(self, Self::Micro(version) if version >= 1 && version <= 4)
     }
 
     /// Checks whether is version refers to a rMQR code.
@@ -275,6 +275,57 @@ impl Version {
             Self::RectMicro(_, 139) => Ok(5),
             _ => Err(QrError::InvalidVersion),
         }
+    }
+
+    /// All widths of rMQR code.
+    pub(crate) const RMQR_ALL_WIDTH: [i16; 6] = [27, 43, 59, 77, 99, 139];
+
+    /// All heights of rMQR code.
+    pub(crate) const RMQR_ALL_HEIGHT: [i16; 6] = [7, 9, 11, 13, 15, 17];
+}
+
+#[cfg(test)]
+mod version_tests {
+    use crate::types::Version;
+
+    #[test]
+    fn test_is_normal() {
+        for version in 1..=40 {
+            assert!(Version::Normal(version).is_normal());
+        }
+        assert!(!Version::Normal(0).is_normal());
+        assert!(!Version::Normal(41).is_normal());
+
+        assert!(!Version::Micro(1).is_normal());
+        assert!(!Version::RectMicro(7, 43).is_normal());
+    }
+
+    #[test]
+    fn test_is_micro() {
+        for version in 1..=4 {
+            assert!(Version::Micro(version).is_micro());
+        }
+        assert!(!Version::Micro(0).is_micro());
+        assert!(!Version::Micro(5).is_micro());
+
+        assert!(!Version::Normal(1).is_micro());
+        assert!(!Version::RectMicro(7, 43).is_micro());
+    }
+
+    #[test]
+    fn test_is_rect_micro() {
+        for width in Version::RMQR_ALL_WIDTH {
+            for height in Version::RMQR_ALL_HEIGHT {
+                if width == 27 && (height != 11 && height != 13) {
+                    continue;
+                }
+                assert!(Version::RectMicro(height, width).is_rect_micro());
+            }
+        }
+        assert!(!Version::RectMicro(0, 0).is_rect_micro());
+
+        assert!(!Version::Normal(1).is_rect_micro());
+        assert!(!Version::Micro(1).is_rect_micro());
     }
 }
 

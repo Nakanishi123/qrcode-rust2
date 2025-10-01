@@ -1048,9 +1048,6 @@ fn bench_find_min_version(bencher: &mut test::Bencher) {
 //------------------------------------------------------------------------------
 //{{{ Auto rMQR code's version minimization
 
-const RMQR_ALL_WIDTH: [i16; 6] = [27, 43, 59, 77, 99, 139];
-const RMQR_ALL_HEIGHT: [i16; 6] = [7, 9, 11, 13, 15, 17];
-
 /// Automatically determines the minimum version to store the data, and encode
 /// the result.
 ///
@@ -1063,8 +1060,8 @@ const RMQR_ALL_HEIGHT: [i16; 6] = [7, 9, 11, 13, 15, 17];
 pub fn encode_auto_rect_micro(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> {
     let segments = Parser::new(data).collect::<Vec<Segment>>();
     let mut possible_versions = Vec::new();
-    for width in RMQR_ALL_WIDTH {
-        for height in RMQR_ALL_HEIGHT {
+    for width in Version::RMQR_ALL_WIDTH {
+        for height in Version::RMQR_ALL_HEIGHT {
             let version = Version::RectMicro(height, width);
             if !version.is_rect_micro() {
                 continue;
