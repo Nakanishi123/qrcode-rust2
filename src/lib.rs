@@ -94,14 +94,14 @@ impl QrCode {
     /// ```
     /// use qrcode::QrCode;
     ///
-    /// let code = QrCode::rect_micro(b"Some data").unwrap();
+    /// let code = QrCode::new_rect_micro(b"Some data").unwrap();
     /// ```
     ///
     /// # Errors
     ///
     /// Returns error if the rMQR code cannot be constructed, e.g. when the data
     /// is too long.
-    pub fn rect_micro<D: AsRef<[u8]>>(data: D) -> QrResult<Self> {
+    pub fn new_rect_micro<D: AsRef<[u8]>>(data: D) -> QrResult<Self> {
         Self::rect_micro_with_error_correction_level(data, EcLevel::M)
     }
 
