@@ -10,9 +10,11 @@
 use alloc::vec::Vec;
 use core::cmp::min;
 
-use crate::cast::{As, Truncate};
-use crate::optimize::{Optimizer, Parser, Segment, total_encoded_len};
-use crate::types::{EcLevel, Mode, QrError, QrResult, Version};
+use crate::{
+    cast::{As, Truncate},
+    optimize::{Optimizer, Parser, Segment, total_encoded_len},
+    types::{EcLevel, Mode, QrError, QrResult, Version},
+};
 
 //------------------------------------------------------------------------------
 //{{{ Bits
@@ -29,7 +31,11 @@ impl Bits {
     /// Constructs a new, empty bits structure.
     #[must_use]
     pub const fn new(version: Version) -> Self {
-        Self { data: Vec::new(), bit_offset: 0, version }
+        Self {
+            data: Vec::new(),
+            bit_offset: 0,
+            version,
+        }
     }
 
     /// Pushes an N-bit big-endian integer to the end of the bits.
@@ -38,7 +44,10 @@ impl Bits {
     /// `n` bit in size. Otherwise the excess bits may stomp on the existing
     /// ones.
     fn push_number(&mut self, n: usize, number: u16) {
-        debug_assert!(n == 16 || n < 16 && number < (1 << n), "{number} is too big as a {n}-bit number");
+        debug_assert!(
+            n == 16 || n < 16 && number < (1 << n),
+            "{number} is too big as a {n}-bit number"
+        );
 
         let b = self.bit_offset + n;
         let last_index = self.data.len().wrapping_sub(1);
@@ -94,7 +103,11 @@ impl Bits {
     /// Total number of bits currently pushed.
     #[must_use]
     pub fn len(&self) -> usize {
-        if self.bit_offset == 0 { self.data.len() * 8 } else { (self.data.len() - 1) * 8 + self.bit_offset }
+        if self.bit_offset == 0 {
+            self.data.len() * 8
+        } else {
+            (self.data.len() - 1) * 8 + self.bit_offset
+        }
     }
 
     /// Whether there are any bits pushed.
@@ -211,7 +224,8 @@ impl Bits {
             (_, ExtendedMode::StructuredAppend) => 0b0011,
         };
         let bits = self.version.mode_bits_count();
-        self.push_number_checked(bits, number).or(Err(QrError::UnsupportedCharacterSet))
+        self.push_number_checked(bits, number)
+            .or(Err(QrError::UnsupportedCharacterSet))
     }
 }
 
@@ -229,8 +243,7 @@ impl Bits {
     /// ```
     /// #![allow(unused_must_use)]
     ///
-    /// use qrcode::bits::Bits;
-    /// use qrcode::types::Version;
+    /// use qrcode::{bits::Bits, types::Version};
     ///
     /// let mut bits = Bits::new(Version::Normal(1));
     /// bits.push_eci_designator(9); // 9 = ISO-8859-7 (Greek).
@@ -282,9 +295,12 @@ impl Bits {
 
 #[cfg(test)]
 mod eci_tests {
-    use crate::bits::Bits;
-    use crate::types::{QrError, Version};
     use alloc::vec;
+
+    use crate::{
+        bits::Bits,
+        types::{QrError, Version},
+    };
 
     #[test]
     fn test_9() {
@@ -297,26 +313,38 @@ mod eci_tests {
     fn test_899() {
         let mut bits = Bits::new(Version::Normal(1));
         assert_eq!(bits.push_eci_designator(899), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b0111_1000, 0b0011_1000, 0b0011_0000]);
+        assert_eq!(
+            bits.into_bytes(),
+            vec![0b0111_1000, 0b0011_1000, 0b0011_0000]
+        );
     }
 
     #[test]
     fn test_999_999() {
         let mut bits = Bits::new(Version::Normal(1));
         assert_eq!(bits.push_eci_designator(999_999), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b0111_1100, 0b1111_0100, 0b0010_0011, 0b1111_0000]);
+        assert_eq!(
+            bits.into_bytes(),
+            vec![0b0111_1100, 0b1111_0100, 0b0010_0011, 0b1111_0000]
+        );
     }
 
     #[test]
     fn test_invalid_designator() {
         let mut bits = Bits::new(Version::Normal(1));
-        assert_eq!(bits.push_eci_designator(1_000_000), Err(QrError::InvalidEciDesignator));
+        assert_eq!(
+            bits.push_eci_designator(1_000_000),
+            Err(QrError::InvalidEciDesignator)
+        );
     }
 
     #[test]
     fn test_unsupported_character_set() {
         let mut bits = Bits::new(Version::Micro(4));
-        assert_eq!(bits.push_eci_designator(9), Err(QrError::UnsupportedCharacterSet));
+        assert_eq!(
+            bits.push_eci_designator(9),
+            Err(QrError::UnsupportedCharacterSet)
+        );
     }
 }
 
@@ -343,7 +371,10 @@ impl Bits {
     pub fn push_numeric_data(&mut self, data: &[u8]) -> QrResult<()> {
         self.push_header(Mode::Numeric, data.len())?;
         for chunk in data.chunks(3) {
-            let number = chunk.iter().map(|b| u16::from(*b - b'0')).fold(0, |a, b| a * 10 + b);
+            let number = chunk
+                .iter()
+                .map(|b| u16::from(*b - b'0'))
+                .fold(0, |a, b| a * 10 + b);
             let length = chunk.len() * 3 + 1;
             self.push_number(length, number);
         }
@@ -353,9 +384,12 @@ impl Bits {
 
 #[cfg(test)]
 mod numeric_tests {
-    use crate::bits::Bits;
-    use crate::types::{QrError, Version};
     use alloc::vec;
+
+    use crate::{
+        bits::Bits,
+        types::{QrError, Version},
+    };
 
     #[test]
     fn test_iso_18004_2006_example_1() {
@@ -363,7 +397,14 @@ mod numeric_tests {
         assert_eq!(bits.push_numeric_data(b"01234567"), Ok(()));
         assert_eq!(
             bits.into_bytes(),
-            vec![0b0001_0000, 0b0010_0000, 0b0000_1100, 0b0101_0110, 0b0110_0001, 0b1000_0000]
+            vec![
+                0b0001_0000,
+                0b0010_0000,
+                0b0000_1100,
+                0b0101_0110,
+                0b0110_0001,
+                0b1000_0000
+            ]
         );
     }
 
@@ -409,7 +450,10 @@ mod numeric_tests {
     #[test]
     fn test_data_too_long_error() {
         let mut bits = Bits::new(Version::Micro(1));
-        assert_eq!(bits.push_numeric_data(b"12345678"), Err(QrError::DataTooLong));
+        assert_eq!(
+            bits.push_numeric_data(b"12345678"),
+            Err(QrError::DataTooLong)
+        );
     }
 }
 
@@ -452,7 +496,10 @@ impl Bits {
     pub fn push_alphanumeric_data(&mut self, data: &[u8]) -> QrResult<()> {
         self.push_header(Mode::Alphanumeric, data.len())?;
         for chunk in data.chunks(2) {
-            let number = chunk.iter().map(|b| alphanumeric_digit(*b)).fold(0, |a, b| a * 45 + b);
+            let number = chunk
+                .iter()
+                .map(|b| alphanumeric_digit(*b))
+                .fold(0, |a, b| a * 45 + b);
             let length = chunk.len() * 5 + 1;
             self.push_number(length, number);
         }
@@ -462,9 +509,12 @@ impl Bits {
 
 #[cfg(test)]
 mod alphanumeric_tests {
-    use crate::bits::Bits;
-    use crate::types::{QrError, Version};
     use alloc::vec;
+
+    use crate::{
+        bits::Bits,
+        types::{QrError, Version},
+    };
 
     #[test]
     fn test_iso_18004_2006_example() {
@@ -472,20 +522,33 @@ mod alphanumeric_tests {
         assert_eq!(bits.push_alphanumeric_data(b"AC-42"), Ok(()));
         assert_eq!(
             bits.into_bytes(),
-            vec![0b0010_0000, 0b0010_1001, 0b1100_1110, 0b1110_0111, 0b0010_0001, 0b0000_0000]
+            vec![
+                0b0010_0000,
+                0b0010_1001,
+                0b1100_1110,
+                0b1110_0111,
+                0b0010_0001,
+                0b0000_0000
+            ]
         );
     }
 
     #[test]
     fn test_micro_qr_unsupported() {
         let mut bits = Bits::new(Version::Micro(1));
-        assert_eq!(bits.push_alphanumeric_data(b"A"), Err(QrError::UnsupportedCharacterSet));
+        assert_eq!(
+            bits.push_alphanumeric_data(b"A"),
+            Err(QrError::UnsupportedCharacterSet)
+        );
     }
 
     #[test]
     fn test_data_too_long() {
         let mut bits = Bits::new(Version::Micro(2));
-        assert_eq!(bits.push_alphanumeric_data(b"ABCDEFGH"), Err(QrError::DataTooLong));
+        assert_eq!(
+            bits.push_alphanumeric_data(b"ABCDEFGH"),
+            Err(QrError::DataTooLong)
+        );
     }
 }
 
@@ -510,14 +573,20 @@ impl Bits {
 
 #[cfg(test)]
 mod byte_tests {
-    use crate::bits::Bits;
-    use crate::types::{QrError, Version};
     use alloc::vec;
+
+    use crate::{
+        bits::Bits,
+        types::{QrError, Version},
+    };
 
     #[test]
     fn test() {
         let mut bits = Bits::new(Version::Normal(1));
-        assert_eq!(bits.push_byte_data(b"\x12\x34\x56\x78\x9a\xbc\xde\xf0"), Ok(()));
+        assert_eq!(
+            bits.push_byte_data(b"\x12\x34\x56\x78\x9a\xbc\xde\xf0"),
+            Ok(())
+        );
         assert_eq!(
             bits.into_bytes(),
             vec![
@@ -538,13 +607,19 @@ mod byte_tests {
     #[test]
     fn test_micro_qr_unsupported() {
         let mut bits = Bits::new(Version::Micro(2));
-        assert_eq!(bits.push_byte_data(b"?"), Err(QrError::UnsupportedCharacterSet));
+        assert_eq!(
+            bits.push_byte_data(b"?"),
+            Err(QrError::UnsupportedCharacterSet)
+        );
     }
 
     #[test]
     fn test_data_too_long() {
         let mut bits = Bits::new(Version::Micro(3));
-        assert_eq!(bits.push_byte_data(b"0123456701234567"), Err(QrError::DataTooLong));
+        assert_eq!(
+            bits.push_byte_data(b"0123456701234567"),
+            Err(QrError::DataTooLong)
+        );
     }
 }
 
@@ -568,7 +643,11 @@ impl Bits {
                 return Err(QrError::InvalidCharacter);
             }
             let cp = u16::from(kanji[0]) * 256 + u16::from(kanji[1]);
-            let bytes = if cp < 0xe040 { cp - 0x8140 } else { cp - 0xc140 };
+            let bytes = if cp < 0xe040 {
+                cp - 0x8140
+            } else {
+                cp - 0xc140
+            };
             let number = (bytes >> 8) * 0xc0 + (bytes & 0xff);
             self.push_number(13, number);
         }
@@ -578,27 +657,45 @@ impl Bits {
 
 #[cfg(test)]
 mod kanji_tests {
-    use crate::bits::Bits;
-    use crate::types::{QrError, Version};
     use alloc::vec;
+
+    use crate::{
+        bits::Bits,
+        types::{QrError, Version},
+    };
 
     #[test]
     fn test_iso_18004_example() {
         let mut bits = Bits::new(Version::Normal(1));
         assert_eq!(bits.push_kanji_data(b"\x93\x5f\xe4\xaa"), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b1000_0000, 0b0010_0110, 0b1100_1111, 0b1110_1010, 0b1010_1000]);
+        assert_eq!(
+            bits.into_bytes(),
+            vec![
+                0b1000_0000,
+                0b0010_0110,
+                0b1100_1111,
+                0b1110_1010,
+                0b1010_1000
+            ]
+        );
     }
 
     #[test]
     fn test_micro_qr_unsupported() {
         let mut bits = Bits::new(Version::Micro(2));
-        assert_eq!(bits.push_kanji_data(b"?"), Err(QrError::UnsupportedCharacterSet));
+        assert_eq!(
+            bits.push_kanji_data(b"?"),
+            Err(QrError::UnsupportedCharacterSet)
+        );
     }
 
     #[test]
     fn test_data_too_long() {
         let mut bits = Bits::new(Version::Micro(3));
-        assert_eq!(bits.push_kanji_data(b"\x93_\x93_\x93_\x93_\x93_\x93_\x93_\x93_"), Err(QrError::DataTooLong));
+        assert_eq!(
+            bits.push_kanji_data(b"\x93_\x93_\x93_\x93_\x93_\x93_\x93_\x93_"),
+            Err(QrError::DataTooLong)
+        );
     }
 }
 
@@ -613,8 +710,7 @@ impl Bits {
     /// ```
     /// #![allow(unused_must_use)]
     ///
-    /// use qrcode::bits::Bits;
-    /// use qrcode::types::Version;
+    /// use qrcode::{bits::Bits, types::Version};
     ///
     /// let mut bits = Bits::new(Version::Normal(1));
     /// bits.push_fnc1_first_position();
@@ -622,7 +718,8 @@ impl Bits {
     /// bits.push_alphanumeric_data(b"%10ABC123");
     /// ```
     ///
-    /// In QR code, the character `%` is used as the data field separator (0x1D).
+    /// In QR code, the character `%` is used as the data field separator
+    /// (0x1D).
     ///
     /// # Errors
     ///
@@ -639,8 +736,7 @@ impl Bits {
     /// ```
     /// #![allow(unused_must_use)]
     ///
-    /// use qrcode::bits::Bits;
-    /// use qrcode::types::Version;
+    /// use qrcode::{bits::Bits, types::Version};
     ///
     /// let mut bits = Bits::new(Version::Normal(1));
     /// bits.push_fnc1_second_position(37);
@@ -788,7 +884,11 @@ impl Bits {
             self.bit_offset = 0;
             let data_bytes_length = data_length / 8;
             let padding_bytes_count = data_bytes_length - self.data.len();
-            let padding = PADDING_BYTES.iter().copied().cycle().take(padding_bytes_count);
+            let padding = PADDING_BYTES
+                .iter()
+                .copied()
+                .cycle()
+                .take(padding_bytes_count);
             self.data.extend(padding);
         }
 
@@ -802,9 +902,12 @@ impl Bits {
 
 #[cfg(test)]
 mod finish_tests {
-    use crate::bits::Bits;
-    use crate::types::{EcLevel, QrError, Version};
     use alloc::vec;
+
+    use crate::{
+        bits::Bits,
+        types::{EcLevel, QrError, Version},
+    };
 
     #[test]
     fn test_hello_world() {
@@ -843,7 +946,10 @@ mod finish_tests {
         let mut bits = Bits::new(Version::Micro(1));
         assert_eq!(bits.push_numeric_data(b"99999"), Ok(()));
         assert_eq!(bits.push_terminator(EcLevel::L), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b1011_1111, 0b0011_1110, 0b0011_0000]);
+        assert_eq!(
+            bits.into_bytes(),
+            vec![0b1011_1111, 0b0011_1110, 0b0011_0000]
+        );
     }
 
     #[test]
@@ -851,7 +957,10 @@ mod finish_tests {
         let mut bits = Bits::new(Version::Micro(1));
         assert_eq!(bits.push_numeric_data(b"9999"), Ok(()));
         assert_eq!(bits.push_terminator(EcLevel::L), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b1001_1111, 0b0011_1100, 0b1000_0000]);
+        assert_eq!(
+            bits.into_bytes(),
+            vec![0b1001_1111, 0b0011_1100, 0b1000_0000]
+        );
     }
 
     #[test]
@@ -859,7 +968,10 @@ mod finish_tests {
         let mut bits = Bits::new(Version::Micro(1));
         assert_eq!(bits.push_numeric_data(b"999"), Ok(()));
         assert_eq!(bits.push_terminator(EcLevel::L), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b0111_1111, 0b0011_1000, 0b0000_0000]);
+        assert_eq!(
+            bits.into_bytes(),
+            vec![0b0111_1111, 0b0011_1000, 0b0000_0000]
+        );
     }
 
     #[test]
@@ -913,10 +1025,12 @@ impl Bits {
 
 #[cfg(test)]
 mod encode_tests {
-    use crate::bits::Bits;
-    use crate::types::{EcLevel, QrError, QrResult, Version};
-    use alloc::vec;
-    use alloc::vec::Vec;
+    use alloc::{vec, vec::Vec};
+
+    use crate::{
+        bits::Bits,
+        types::{EcLevel, QrError, QrResult, Version},
+    };
 
     fn encode(data: &[u8], version: Version, ec_level: EcLevel) -> QrResult<Vec<u8>> {
         let mut bits = Bits::new(version);
@@ -951,7 +1065,16 @@ mod encode_tests {
     #[test]
     fn test_auto_mode_switch() {
         let res = encode(b"123A", Version::Micro(2), EcLevel::L);
-        assert_eq!(res, Ok(vec![0b0001_1000, 0b1111_0111, 0b0010_0101, 0b0000_0000, 0b1110_1100]));
+        assert_eq!(
+            res,
+            Ok(vec![
+                0b0001_1000,
+                0b1111_0111,
+                0b0010_0101,
+                0b0000_0000,
+                0b1110_1100
+            ])
+        );
     }
 
     #[test]
@@ -980,7 +1103,9 @@ pub fn encode_auto(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> {
     for version in &[Version::Normal(9), Version::Normal(26), Version::Normal(40)] {
         let opt_segments = Optimizer::new(segments.iter().copied(), *version).collect::<Vec<_>>();
         let total_len = total_encoded_len(&opt_segments, *version);
-        let data_capacity = version.fetch(ec_level, &DATA_LENGTHS).expect("invalid DATA_LENGTHS");
+        let data_capacity = version
+            .fetch(ec_level, &DATA_LENGTHS)
+            .expect("invalid DATA_LENGTHS");
         if total_len <= data_capacity {
             let min_version = find_min_version(total_len, ec_level);
             let mut bits = Bits::new(min_version);
@@ -1004,18 +1129,28 @@ fn find_min_version(length: usize, ec_level: EcLevel) -> Version {
         // mid is always in [0, size).
         // mid >= 0: by definition
         // mid < size: mid = size / 2 + size / 4 + size / 8 ...
-        base = if DATA_LENGTHS[mid][ec_level as usize] > length { base } else { mid };
+        base = if DATA_LENGTHS[mid][ec_level as usize] > length {
+            base
+        } else {
+            mid
+        };
         size -= half;
     }
     // base is always in [0, mid) because base <= mid.
-    base = if DATA_LENGTHS[base][ec_level as usize] >= length { base } else { base + 1 };
+    base = if DATA_LENGTHS[base][ec_level as usize] >= length {
+        base
+    } else {
+        base + 1
+    };
     Version::Normal((base + 1).as_i16())
 }
 
 #[cfg(test)]
 mod encode_auto_tests {
-    use crate::bits::{encode_auto, find_min_version};
-    use crate::types::{EcLevel, Version};
+    use crate::{
+        bits::{encode_auto, find_min_version},
+        types::{EcLevel, Version},
+    };
 
     #[test]
     fn test_find_min_version() {
@@ -1091,8 +1226,10 @@ pub fn encode_auto_micro(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> {
 
 #[cfg(test)]
 mod encode_auto_micro_tests {
-    use crate::bits::encode_auto_micro;
-    use crate::types::{EcLevel, Version};
+    use crate::{
+        bits::encode_auto_micro,
+        types::{EcLevel, Version},
+    };
 
     #[test]
     fn test_alpha_l() {
@@ -1135,7 +1272,8 @@ pub fn encode_auto_rect_micro(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> 
             if !version.is_rect_micro() {
                 continue;
             }
-            let opt_segments = Optimizer::new(segments.iter().copied(), version).collect::<Vec<_>>();
+            let opt_segments =
+                Optimizer::new(segments.iter().copied(), version).collect::<Vec<_>>();
             let total_len = total_encoded_len(&opt_segments, version);
             let data_capacity = version.fetch(ec_level, &DATA_LENGTHS)?;
             if total_len <= data_capacity {
@@ -1145,7 +1283,9 @@ pub fn encode_auto_rect_micro(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> 
         }
     }
 
-    let min_version = possible_versions.iter().min_by_key(|v| v.width() * v.height());
+    let min_version = possible_versions
+        .iter()
+        .min_by_key(|v| v.width() * v.height());
 
     if let Some(version) = min_version {
         let mut bits = Bits::new(*version);
@@ -1160,8 +1300,10 @@ pub fn encode_auto_rect_micro(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> 
 
 #[cfg(test)]
 mod encode_auto_rect_micro_tests {
-    use crate::bits::encode_auto_rect_micro;
-    use crate::types::{EcLevel, Version};
+    use crate::{
+        bits::encode_auto_rect_micro,
+        types::{EcLevel, Version},
+    };
 
     #[test]
     fn test_alpha_m() {
@@ -1177,7 +1319,8 @@ mod encode_auto_rect_micro_tests {
 
     #[test]
     fn test_mixed() {
-        let bits = encode_auto_rect_micro(b"This is a mixed data test. 1234567890", EcLevel::H).unwrap();
+        let bits =
+            encode_auto_rect_micro(b"This is a mixed data test. 1234567890", EcLevel::H).unwrap();
         assert_eq!(bits.version(), Version::RectMicro(13, 99));
     }
 }

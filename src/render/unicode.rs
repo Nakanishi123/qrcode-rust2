@@ -4,11 +4,9 @@
 
 //! UTF-8 rendering, with 2 pixels per symbol.
 
-use crate::render::{Canvas as RenderCanvas, Color, Pixel};
+use alloc::{string::String, vec, vec::Vec};
 
-use alloc::string::String;
-use alloc::vec;
-use alloc::vec::Vec;
+use crate::render::{Canvas as RenderCanvas, Color, Pixel};
 
 const CODEPAGE: [&str; 4] = [" ", "\u{2584}", "\u{2580}", "\u{2588}"];
 
@@ -58,7 +56,11 @@ impl RenderCanvas for Canvas1x2 {
 
     fn new(width: u32, height: u32, dark_pixel: Dense1x2, light_pixel: Dense1x2) -> Self {
         let a = vec![light_pixel.value(); (width * height) as usize];
-        Self { width, canvas: a, dark_pixel: dark_pixel.value() }
+        Self {
+            width,
+            canvas: a,
+            dark_pixel: dark_pixel.value(),
+        }
     }
 
     fn draw_dark_pixel(&mut self, x: u32, y: u32) {
@@ -76,7 +78,11 @@ impl RenderCanvas for Canvas1x2 {
                 {
                     // Then zipping those 2 lines together into a single 2-bit number list.
                     if rows.len() == 2 {
-                        rows[0].iter().zip(rows[1]).map(|(top, bot)| top * 2 + bot).collect::<Vec<u8>>()
+                        rows[0]
+                            .iter()
+                            .zip(rows[1])
+                            .map(|(top, bot)| top * 2 + bot)
+                            .collect::<Vec<u8>>()
                     } else {
                         rows[0].iter().map(|top| top * 2).collect::<Vec<u8>>()
                     }
@@ -100,15 +106,16 @@ fn test_render_to_utf8_string() {
 
     assert_eq!(&image, " ▄  \n  ▀ ");
 
-    let image2 = Renderer::<Dense1x2>::new(colors, 2, 2, 1).module_dimensions(2, 2).build();
+    let image2 = Renderer::<Dense1x2>::new(colors, 2, 2, 1)
+        .module_dimensions(2, 2)
+        .build();
 
     assert_eq!(&image2, "        \n  ██    \n    ██  \n        ");
 }
 
 #[test]
 fn integration_render_utf8_1x2() {
-    use crate::render::unicode::Dense1x2;
-    use crate::{EcLevel, QrCode, Version};
+    use crate::{EcLevel, QrCode, Version, render::unicode::Dense1x2};
 
     let code = QrCode::with_version(b"09876542", Version::Micro(2), EcLevel::L).unwrap();
     let image = code.render::<Dense1x2>().module_dimensions(1, 1).build();
@@ -129,8 +136,7 @@ fn integration_render_utf8_1x2() {
 
 #[test]
 fn integration_render_utf8_1x2_inverted() {
-    use crate::render::unicode::Dense1x2;
-    use crate::{EcLevel, QrCode, Version};
+    use crate::{EcLevel, QrCode, Version, render::unicode::Dense1x2};
 
     let code = QrCode::with_version(b"12345678", Version::Micro(2), EcLevel::L).unwrap();
     let image = code

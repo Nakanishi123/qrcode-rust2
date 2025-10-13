@@ -7,13 +7,13 @@
 
 //! String rendering support.
 
-use crate::cast::As;
-use crate::render::{Canvas as RenderCanvas, Pixel};
-use crate::types::Color;
+use alloc::{string::String, vec, vec::Vec};
 
-use alloc::string::String;
-use alloc::vec;
-use alloc::vec::Vec;
+use crate::{
+    cast::As,
+    render::{Canvas as RenderCanvas, Pixel},
+    types::Color,
+};
 
 /// Abstraction of an image element.
 pub trait Element: Copy {
@@ -123,7 +123,11 @@ fn test_render_to_string() {
     let image: String = Renderer::<char>::new(colors, 2, 2, 1).build();
     assert_eq!(&image, "    \n \u{2588}  \n  \u{2588} \n    ");
 
-    let image2 = Renderer::new(colors, 2, 2, 1).light_color("A").dark_color("!B!").module_dimensions(2, 2).build();
+    let image2 = Renderer::new(colors, 2, 2, 1)
+        .light_color("A")
+        .dark_color("!B!")
+        .module_dimensions(2, 2)
+        .build();
 
     assert_eq!(
         &image2,

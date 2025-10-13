@@ -3,8 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use qrcode::render::svg;
-use qrcode::{EcLevel, QrCode, Version};
+use qrcode::{EcLevel, QrCode, Version, render::svg};
 
 fn main() {
     let code = QrCode::with_version(b"01234567", Version::Micro(2), EcLevel::L).unwrap();

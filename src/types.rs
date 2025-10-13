@@ -8,11 +8,14 @@
 //! The `types` module contains types associated with the functional elements of
 //! a QR code.
 
+use core::{
+    cmp::{Ordering, PartialOrd},
+    default::Default,
+    fmt::{Display, Error, Formatter},
+    ops::Not,
+};
+
 use crate::cast::As;
-use core::cmp::{Ordering, PartialOrd};
-use core::default::Default;
-use core::fmt::{Display, Error, Formatter};
-use core::ops::Not;
 
 //------------------------------------------------------------------------------
 //{{{ QrResult
@@ -165,7 +168,11 @@ impl Version {
     /// Except for rMQR code, the height is the same as the width.
     #[must_use]
     pub const fn height(self) -> i16 {
-        if let Self::RectMicro(h, _) = self { h } else { self.width() }
+        if let Self::RectMicro(h, _) = self {
+            h
+        } else {
+            self.width()
+        }
     }
 
     /// Obtains an object from a hard-coded table.

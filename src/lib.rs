@@ -46,8 +46,7 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
-use alloc::string::String;
-use alloc::vec::Vec;
+use alloc::{string::String, vec::Vec};
 use core::ops::Index;
 
 pub mod bits;
@@ -59,9 +58,10 @@ pub mod render;
 pub mod types;
 
 pub use crate::types::{Color, EcLevel, QrResult, Version};
-
-use crate::cast::As;
-use crate::render::{Pixel, Renderer};
+use crate::{
+    cast::As,
+    render::{Pixel, Renderer},
+};
 
 /// The encoded QR code symbol.
 #[derive(Clone, Debug)]
@@ -147,7 +147,10 @@ impl QrCode {
     ///
     /// Returns error if the QR code cannot be constructed, e.g. when the data
     /// is too long.
-    pub fn with_error_correction_level<D: AsRef<[u8]>>(data: D, ec_level: EcLevel) -> QrResult<Self> {
+    pub fn with_error_correction_level<D: AsRef<[u8]>>(
+        data: D,
+        ec_level: EcLevel,
+    ) -> QrResult<Self> {
         let bits = bits::encode_auto(data.as_ref(), ec_level)?;
         Self::with_bits(bits, ec_level)
     }
@@ -167,7 +170,10 @@ impl QrCode {
     ///
     /// Returns error if the Micro QR code cannot be constructed, e.g. when the
     /// data is too long.
-    pub fn micro_with_error_correction_level<D: AsRef<[u8]>>(data: D, ec_level: EcLevel) -> QrResult<Self> {
+    pub fn micro_with_error_correction_level<D: AsRef<[u8]>>(
+        data: D,
+        ec_level: EcLevel,
+    ) -> QrResult<Self> {
         let bits = bits::encode_auto_micro(data.as_ref(), ec_level)?;
         Self::with_bits(bits, ec_level)
     }
@@ -187,7 +193,10 @@ impl QrCode {
     ///
     /// Returns error if the rMQR code cannot be constructed, e.g. when the data
     /// is too long.
-    pub fn rect_micro_with_error_correction_level<D: AsRef<[u8]>>(data: D, ec_level: EcLevel) -> QrResult<Self> {
+    pub fn rect_micro_with_error_correction_level<D: AsRef<[u8]>>(
+        data: D,
+        ec_level: EcLevel,
+    ) -> QrResult<Self> {
         let bits = bits::encode_auto_rect_micro(data.as_ref(), ec_level)?;
         Self::with_bits(bits, ec_level)
     }
@@ -215,7 +224,11 @@ impl QrCode {
     /// Returns error if the QR code cannot be constructed, e.g. when the data
     /// is too long, or when the version and error correction level are
     /// incompatible.
-    pub fn with_version<D: AsRef<[u8]>>(data: D, version: Version, ec_level: EcLevel) -> QrResult<Self> {
+    pub fn with_version<D: AsRef<[u8]>>(
+        data: D,
+        version: Version,
+        ec_level: EcLevel,
+    ) -> QrResult<Self> {
         let mut bits = bits::Bits::new(version);
         bits.push_optimal_data(data.as_ref())?;
         bits.push_terminator(ec_level)?;
@@ -236,8 +249,7 @@ impl QrCode {
     /// ```
     /// #![allow(unused_must_use)]
     ///
-    /// use qrcode::bits::Bits;
-    /// use qrcode::{EcLevel, QrCode, Version};
+    /// use qrcode::{EcLevel, QrCode, Version, bits::Bits};
     ///
     /// let mut bits = Bits::new(Version::Normal(1));
     /// bits.push_eci_designator(9);
@@ -322,7 +334,11 @@ impl QrCode {
     /// debugging only.
     #[must_use]
     pub fn to_debug_str(&self, on_char: char, off_char: char) -> String {
-        self.render().quiet_zone(false).dark_color(on_char).light_color(off_char).build()
+        self.render()
+            .quiet_zone(false)
+            .dark_color(on_char)
+            .light_color(off_char)
+            .build()
     }
 
     /// Converts the QR code to a vector of booleans. Each entry represents the
@@ -338,7 +354,10 @@ impl QrCode {
     #[deprecated(since = "0.4.0", note = "use `into_colors()` instead")]
     #[must_use]
     pub fn into_vec(self) -> Vec<bool> {
-        self.content.into_iter().map(|c| c != Color::Light).collect()
+        self.content
+            .into_iter()
+            .map(|c| c != Color::Light)
+            .collect()
     }
 
     /// Converts the QR code to a vector of colors.
@@ -453,7 +472,8 @@ mod tests {
 
     #[test]
     fn test_annex_i_rmqr() {
-        let code = QrCode::with_version(b"01234567", Version::RectMicro(15, 43), EcLevel::M).unwrap();
+        let code =
+            QrCode::with_version(b"01234567", Version::RectMicro(15, 43), EcLevel::M).unwrap();
         assert_eq!(
             &*code.to_debug_str('#', '.'),
             "\

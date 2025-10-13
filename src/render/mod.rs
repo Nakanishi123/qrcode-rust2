@@ -8,9 +8,9 @@
 
 //! Render a QR code into image.
 
-use crate::cast::As;
-use crate::types::Color;
 use core::cmp::max;
+
+use crate::{cast::As, types::Color};
 
 pub mod eps;
 pub mod image;
@@ -78,8 +78,10 @@ pub trait Canvas: Sized {
 #[derive(Debug)]
 pub struct Renderer<'a, P: Pixel> {
     content: &'a [Color],
-    horizontal_modules_count: u32, // <- we call it `horizontal_modules_count` here to avoid ambiguity of `width`.
-    vertical_modules_count: u32,   // <- we call it `vertical_modules_count` here to avoid ambiguity of `height`.
+    horizontal_modules_count: u32, /* <- we call it `horizontal_modules_count` here to avoid
+                                    * ambiguity of `width`. */
+    vertical_modules_count: u32, /* <- we call it `vertical_modules_count` here to avoid
+                                  * ambiguity of `height`. */
     quiet_zone: u32,
     module_size: (u32, u32),
 
@@ -137,7 +139,10 @@ impl<'a, P: Pixel> Renderer<'a, P> {
     }
 
     /// Sets the size of each module in pixels. Default is 8px.
-    #[deprecated(since = "0.4.0", note = "use `.module_dimensions(width, width)` instead")]
+    #[deprecated(
+        since = "0.4.0",
+        note = "use `.module_dimensions(width, width)` instead"
+    )]
     pub fn module_size(&mut self, width: u32) -> &mut Self {
         self.module_dimensions(width, width)
     }
@@ -199,7 +204,10 @@ impl<'a, P: Pixel> Renderer<'a, P> {
     }
 
     /// Renders the QR code into an image.
-    #[deprecated(since = "0.4.0", note = "renamed to `.build()` to de-emphasize the image connection")]
+    #[deprecated(
+        since = "0.4.0",
+        note = "renamed to `.build()` to de-emphasize the image connection"
+    )]
     pub fn to_image(&self) -> P::Image {
         self.build()
     }
@@ -208,7 +216,11 @@ impl<'a, P: Pixel> Renderer<'a, P> {
     pub fn build(&self) -> P::Image {
         let w = self.horizontal_modules_count;
         let h = self.vertical_modules_count;
-        let qz = if self.has_quiet_zone { self.quiet_zone } else { 0 };
+        let qz = if self.has_quiet_zone {
+            self.quiet_zone
+        } else {
+            0
+        };
         let width = w + 2 * qz;
         let height = h + 2 * qz;
 

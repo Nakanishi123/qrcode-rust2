@@ -7,8 +7,9 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Find the optimal data mode sequence to encode a piece of data.
-use crate::types::{Mode, Version};
 use core::slice::Iter;
+
+use crate::types::{Mode, Version};
 
 //------------------------------------------------------------------------------
 //{{{ Segment
@@ -32,7 +33,11 @@ impl Segment {
     #[must_use]
     pub fn encoded_len(&self, version: Version) -> usize {
         let byte_size = self.end - self.begin;
-        let chars_count = if self.mode == Mode::Kanji { byte_size / 2 } else { byte_size };
+        let chars_count = if self.mode == Mode::Kanji {
+            byte_size / 2
+        } else {
+            byte_size
+        };
 
         let mode_bits_count = version.mode_bits_count();
         let length_bits_count = self.mode.length_bits_count(version);
@@ -98,23 +103,41 @@ impl Parser<'_> {
     /// contains their exclusive subsets. No optimization is done at this point.
     ///
     /// ```
-    /// use qrcode::optimize::{Parser, Segment};
-    /// use qrcode::types::Mode::{Alphanumeric, Byte, Numeric};
+    /// use qrcode::{
+    ///     optimize::{Parser, Segment},
+    ///     types::Mode::{Alphanumeric, Byte, Numeric},
+    /// };
     ///
     /// let parse_res = Parser::new(b"ABC123abcd").collect::<Vec<Segment>>();
     /// assert_eq!(
     ///     parse_res,
     ///     &[
-    ///         Segment { mode: Alphanumeric, begin: 0, end: 3 },
-    ///         Segment { mode: Numeric, begin: 3, end: 6 },
-    ///         Segment { mode: Byte, begin: 6, end: 10 }
+    ///         Segment {
+    ///             mode: Alphanumeric,
+    ///             begin: 0,
+    ///             end: 3
+    ///         },
+    ///         Segment {
+    ///             mode: Numeric,
+    ///             begin: 3,
+    ///             end: 6
+    ///         },
+    ///         Segment {
+    ///             mode: Byte,
+    ///             begin: 6,
+    ///             end: 10
+    ///         }
     ///     ]
     /// );
     /// ```
     #[must_use]
     pub fn new(data: &[u8]) -> Parser<'_> {
         Parser {
-            ecs_iter: EcsIter { base: data.iter(), index: 0, ended: false },
+            ecs_iter: EcsIter {
+                base: data.iter(),
+                index: 0,
+                ended: false,
+            },
             state: State::Init,
             begin: 0,
             pending_single_byte: false,
@@ -129,7 +152,11 @@ impl Iterator for Parser<'_> {
         if self.pending_single_byte {
             self.pending_single_byte = false;
             self.begin += 1;
-            return Some(Segment { mode: Mode::Byte, begin: self.begin - 1, end: self.begin });
+            return Some(Segment {
+                mode: Mode::Byte,
+                begin: self.begin - 1,
+                end: self.begin,
+            });
         }
 
         loop {
@@ -151,22 +178,33 @@ impl Iterator for Parser<'_> {
                     } else {
                         self.pending_single_byte = true;
                         self.begin = next_begin;
-                        return Some(Segment { mode: Mode::Kanji, begin: old_begin, end: next_begin });
+                        return Some(Segment {
+                            mode: Mode::Kanji,
+                            begin: old_begin,
+                            end: next_begin,
+                        });
                     }
                 }
             };
 
             self.begin = i;
-            return Some(Segment { mode: push_mode, begin: old_begin, end: i });
+            return Some(Segment {
+                mode: push_mode,
+                begin: old_begin,
+                end: i,
+            });
         }
     }
 }
 
 #[cfg(test)]
 mod parse_tests {
-    use crate::optimize::{Parser, Segment};
-    use crate::types::Mode;
     use alloc::vec::Vec;
+
+    use crate::{
+        optimize::{Parser, Segment},
+        types::Mode,
+    };
 
     fn parse(data: &[u8]) -> Vec<Segment> {
         Parser::new(data).collect()
@@ -178,11 +216,31 @@ mod parse_tests {
         assert_eq!(
             segs,
             &[
-                Segment { mode: Mode::Numeric, begin: 0, end: 29 },
-                Segment { mode: Mode::Alphanumeric, begin: 29, end: 30 },
-                Segment { mode: Mode::Numeric, begin: 30, end: 32 },
-                Segment { mode: Mode::Alphanumeric, begin: 32, end: 35 },
-                Segment { mode: Mode::Numeric, begin: 35, end: 38 },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 0,
+                    end: 29
+                },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 29,
+                    end: 30
+                },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 30,
+                    end: 32
+                },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 32,
+                    end: 35
+                },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 35,
+                    end: 38
+                },
             ]
         );
     }
@@ -193,10 +251,26 @@ mod parse_tests {
         assert_eq!(
             segs,
             &[
-                Segment { mode: Mode::Kanji, begin: 0, end: 4 },
-                Segment { mode: Mode::Alphanumeric, begin: 4, end: 5 },
-                Segment { mode: Mode::Byte, begin: 5, end: 6 },
-                Segment { mode: Mode::Kanji, begin: 6, end: 8 },
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 0,
+                    end: 4
+                },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 4,
+                    end: 5
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 5,
+                    end: 6
+                },
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 6,
+                    end: 8
+                },
             ]
         );
     }
@@ -208,12 +282,36 @@ mod parse_tests {
         assert_eq!(
             segs,
             &[
-                Segment { mode: Mode::Kanji, begin: 0, end: 4 },
-                Segment { mode: Mode::Byte, begin: 4, end: 5 },
-                Segment { mode: Mode::Kanji, begin: 5, end: 7 },
-                Segment { mode: Mode::Byte, begin: 7, end: 10 },
-                Segment { mode: Mode::Kanji, begin: 10, end: 12 },
-                Segment { mode: Mode::Byte, begin: 12, end: 13 },
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 0,
+                    end: 4
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 4,
+                    end: 5
+                },
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 5,
+                    end: 7
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 7,
+                    end: 10
+                },
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 10,
+                    end: 12
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 12,
+                    end: 13
+                },
             ]
         );
     }
@@ -223,7 +321,18 @@ mod parse_tests {
         let segs = parse(b"\x81\x30");
         assert_eq!(
             segs,
-            &[Segment { mode: Mode::Byte, begin: 0, end: 1 }, Segment { mode: Mode::Numeric, begin: 1, end: 2 },]
+            &[
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 0,
+                    end: 1
+                },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 1,
+                    end: 2
+                },
+            ]
         );
     }
 
@@ -234,7 +343,18 @@ mod parse_tests {
         let segs = parse(b"\xeb\xc0");
         assert_eq!(
             segs,
-            &[Segment { mode: Mode::Byte, begin: 0, end: 1 }, Segment { mode: Mode::Byte, begin: 1, end: 2 },]
+            &[
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 0,
+                    end: 1
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 1,
+                    end: 2
+                },
+            ]
         );
     }
 
@@ -243,7 +363,18 @@ mod parse_tests {
         let segs = parse(b"\x81\x7f");
         assert_eq!(
             segs,
-            &[Segment { mode: Mode::Byte, begin: 0, end: 1 }, Segment { mode: Mode::Byte, begin: 1, end: 2 },]
+            &[
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 0,
+                    end: 1
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 1,
+                    end: 2
+                },
+            ]
         );
     }
 
@@ -252,7 +383,18 @@ mod parse_tests {
         let segs = parse(b"\x81\x40\x81");
         assert_eq!(
             segs,
-            &[Segment { mode: Mode::Kanji, begin: 0, end: 2 }, Segment { mode: Mode::Byte, begin: 2, end: 3 },]
+            &[
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 0,
+                    end: 2
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 2,
+                    end: 3
+                },
+            ]
         );
     }
 }
@@ -281,7 +423,11 @@ impl<I: Iterator<Item = Segment>> Optimizer<I> {
         match segments.next() {
             None => Self {
                 parser: segments,
-                last_segment: Segment { mode: Mode::Numeric, begin: 0, end: 0 },
+                last_segment: Segment {
+                    mode: Mode::Numeric,
+                    begin: 0,
+                    end: 0,
+                },
                 last_segment_size: 0,
                 version,
                 ended: true,
@@ -352,9 +498,12 @@ pub fn total_encoded_len(segments: &[Segment], version: Version) -> usize {
 
 #[cfg(test)]
 mod optimize_tests {
-    use crate::optimize::{Optimizer, Segment, total_encoded_len};
-    use crate::types::{Mode, Version};
     use alloc::vec::Vec;
+
+    use crate::{
+        optimize::{Optimizer, Segment, total_encoded_len},
+        types::{Mode, Version},
+    };
 
     fn test_optimization_result(given: &[Segment], expected: &[Segment], version: Version) {
         let prev_len = total_encoded_len(given, version);
@@ -374,11 +523,34 @@ mod optimize_tests {
     fn test_example_1() {
         test_optimization_result(
             &[
-                Segment { mode: Mode::Alphanumeric, begin: 0, end: 3 },
-                Segment { mode: Mode::Numeric, begin: 3, end: 6 },
-                Segment { mode: Mode::Byte, begin: 6, end: 10 },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 0,
+                    end: 3,
+                },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 3,
+                    end: 6,
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 6,
+                    end: 10,
+                },
             ],
-            &[Segment { mode: Mode::Alphanumeric, begin: 0, end: 6 }, Segment { mode: Mode::Byte, begin: 6, end: 10 }],
+            &[
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 0,
+                    end: 6,
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 6,
+                    end: 10,
+                },
+            ],
             Version::Normal(1),
         );
     }
@@ -387,15 +559,43 @@ mod optimize_tests {
     fn test_example_2() {
         test_optimization_result(
             &[
-                Segment { mode: Mode::Numeric, begin: 0, end: 29 },
-                Segment { mode: Mode::Alphanumeric, begin: 29, end: 30 },
-                Segment { mode: Mode::Numeric, begin: 30, end: 32 },
-                Segment { mode: Mode::Alphanumeric, begin: 32, end: 35 },
-                Segment { mode: Mode::Numeric, begin: 35, end: 38 },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 0,
+                    end: 29,
+                },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 29,
+                    end: 30,
+                },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 30,
+                    end: 32,
+                },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 32,
+                    end: 35,
+                },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 35,
+                    end: 38,
+                },
             ],
             &[
-                Segment { mode: Mode::Numeric, begin: 0, end: 29 },
-                Segment { mode: Mode::Alphanumeric, begin: 29, end: 38 },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 0,
+                    end: 29,
+                },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 29,
+                    end: 38,
+                },
             ],
             Version::Normal(9),
         );
@@ -405,12 +605,32 @@ mod optimize_tests {
     fn test_example_3() {
         test_optimization_result(
             &[
-                Segment { mode: Mode::Kanji, begin: 0, end: 4 },
-                Segment { mode: Mode::Alphanumeric, begin: 4, end: 5 },
-                Segment { mode: Mode::Byte, begin: 5, end: 6 },
-                Segment { mode: Mode::Kanji, begin: 6, end: 8 },
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 0,
+                    end: 4,
+                },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 4,
+                    end: 5,
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 5,
+                    end: 6,
+                },
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 6,
+                    end: 8,
+                },
             ],
-            &[Segment { mode: Mode::Byte, begin: 0, end: 8 }],
+            &[Segment {
+                mode: Mode::Byte,
+                begin: 0,
+                end: 8,
+            }],
             Version::Normal(1),
         );
     }
@@ -418,8 +638,30 @@ mod optimize_tests {
     #[test]
     fn test_example_4() {
         test_optimization_result(
-            &[Segment { mode: Mode::Kanji, begin: 0, end: 10 }, Segment { mode: Mode::Byte, begin: 10, end: 11 }],
-            &[Segment { mode: Mode::Kanji, begin: 0, end: 10 }, Segment { mode: Mode::Byte, begin: 10, end: 11 }],
+            &[
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 0,
+                    end: 10,
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 10,
+                    end: 11,
+                },
+            ],
+            &[
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 0,
+                    end: 10,
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 10,
+                    end: 11,
+                },
+            ],
             Version::Normal(1),
         );
     }
@@ -427,8 +669,30 @@ mod optimize_tests {
     #[test]
     fn test_example_5() {
         test_optimization_result(
-            &[Segment { mode: Mode::Kanji, begin: 0, end: 10 }, Segment { mode: Mode::Byte, begin: 10, end: 11 }],
-            &[Segment { mode: Mode::Kanji, begin: 0, end: 10 }, Segment { mode: Mode::Byte, begin: 10, end: 11 }],
+            &[
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 0,
+                    end: 10,
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 10,
+                    end: 11,
+                },
+            ],
+            &[
+                Segment {
+                    mode: Mode::Kanji,
+                    begin: 0,
+                    end: 10,
+                },
+                Segment {
+                    mode: Mode::Byte,
+                    begin: 10,
+                    end: 11,
+                },
+            ],
             Version::RectMicro(17, 139),
         );
     }
@@ -437,12 +701,28 @@ mod optimize_tests {
     fn test_annex_j_guideline_1a() {
         test_optimization_result(
             &[
-                Segment { mode: Mode::Numeric, begin: 0, end: 3 },
-                Segment { mode: Mode::Alphanumeric, begin: 3, end: 4 },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 0,
+                    end: 3,
+                },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 3,
+                    end: 4,
+                },
             ],
             &[
-                Segment { mode: Mode::Numeric, begin: 0, end: 3 },
-                Segment { mode: Mode::Alphanumeric, begin: 3, end: 4 },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 0,
+                    end: 3,
+                },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 3,
+                    end: 4,
+                },
             ],
             Version::Micro(2),
         );
@@ -452,10 +732,22 @@ mod optimize_tests {
     fn test_annex_j_guideline_1b() {
         test_optimization_result(
             &[
-                Segment { mode: Mode::Numeric, begin: 0, end: 2 },
-                Segment { mode: Mode::Alphanumeric, begin: 2, end: 4 },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 0,
+                    end: 2,
+                },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 2,
+                    end: 4,
+                },
             ],
-            &[Segment { mode: Mode::Alphanumeric, begin: 0, end: 4 }],
+            &[Segment {
+                mode: Mode::Alphanumeric,
+                begin: 0,
+                end: 4,
+            }],
             Version::Micro(2),
         );
     }
@@ -464,10 +756,22 @@ mod optimize_tests {
     fn test_annex_j_guideline_1c() {
         test_optimization_result(
             &[
-                Segment { mode: Mode::Numeric, begin: 0, end: 3 },
-                Segment { mode: Mode::Alphanumeric, begin: 3, end: 4 },
+                Segment {
+                    mode: Mode::Numeric,
+                    begin: 0,
+                    end: 3,
+                },
+                Segment {
+                    mode: Mode::Alphanumeric,
+                    begin: 3,
+                    end: 4,
+                },
             ],
-            &[Segment { mode: Mode::Alphanumeric, begin: 0, end: 4 }],
+            &[Segment {
+                mode: Mode::Alphanumeric,
+                begin: 0,
+                end: 4,
+            }],
             Version::Micro(3),
         );
     }
@@ -485,8 +789,8 @@ enum ExclCharSet {
     /// The end of string.
     End = 0,
 
-    /// All symbols supported by the Alphanumeric encoding, i.e. space, `$`, `%`,
-    /// `*`, `+`, `-`, `.`, `/` and `:`.
+    /// All symbols supported by the Alphanumeric encoding, i.e. space, `$`,
+    /// `%`, `*`, `+`, `-`, `.`, `/` and `:`.
     Symbol = 1,
 
     /// All numbers (0–9).
@@ -508,8 +812,8 @@ enum ExclCharSet {
     KanjiHi3 = 6,
 
     /// The second byte of a Shift JIS 2-byte encoding, in the range 0x40–0xbf,
-    /// excluding letters (covered by `Alpha`), 0x81–0x9f (covered by `KanjiHi1`),
-    /// and the invalid byte 0x7f.
+    /// excluding letters (covered by `Alpha`), 0x81–0x9f (covered by
+    /// `KanjiHi1`), and the invalid byte 0x7f.
     KanjiLo1 = 7,
 
     /// The second byte of a Shift JIS 2-byte encoding, in the range 0xc0–0xfc,

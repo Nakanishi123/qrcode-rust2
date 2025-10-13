@@ -20,13 +20,13 @@
 
 #![cfg(feature = "svg")]
 
-use alloc::format;
-use alloc::string::String;
-use core::fmt::Write;
-use core::marker::PhantomData;
+use alloc::{format, string::String};
+use core::{fmt::Write, marker::PhantomData};
 
-use crate::render::{Canvas as RenderCanvas, Pixel};
-use crate::types::Color as ModuleColor;
+use crate::{
+    render::{Canvas as RenderCanvas, Pixel},
+    types::Color as ModuleColor,
+};
 
 /// An SVG color.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]

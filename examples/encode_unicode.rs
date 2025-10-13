@@ -3,8 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use qrcode::QrCode;
-use qrcode::render::unicode;
+use qrcode::{QrCode, render::unicode};
 
 fn main() {
     let code = QrCode::new(b"Hello").unwrap();

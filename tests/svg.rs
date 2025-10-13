@@ -23,8 +23,12 @@ fn test_annex_i_qr_as_svg() {
 #[test]
 fn test_annex_i_micro_qr_as_svg() {
     let code = QrCode::with_version(b"01234567", Version::Micro(2), EcLevel::L).unwrap();
-    let image =
-        code.render().min_dimensions(200, 200).dark_color(Color("#800000")).light_color(Color("#ffff80")).build();
+    let image = code
+        .render()
+        .min_dimensions(200, 200)
+        .dark_color(Color("#800000"))
+        .light_color(Color("#ffff80"))
+        .build();
     let expected = include_str!("data/test_annex_i_micro_qr_as_svg.svg");
     assert_eq!(&image, expected);
 }
