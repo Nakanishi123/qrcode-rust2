@@ -44,9 +44,6 @@ svg = []
 pic = []
 eps = []
 
-[[bin]]
-name = "qrencode"
-
 [[example]]
 name = "encode_image"
 required-features = ["image"]
