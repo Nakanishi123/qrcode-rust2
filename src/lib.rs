@@ -17,7 +17,7 @@
 //! # #[cfg(feature = "image")]
 //! # {
 //! use image::Luma;
-//! use qrcode::QrCode;
+//! use qrcode2::QrCode;
 //!
 //! // Encode some data into bits.
 //! let code = QrCode::new(b"01234567").unwrap();
@@ -36,7 +36,7 @@
 //! # }
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/qrcode/0.14.1/")]
+#![doc(html_root_url = "https://docs.rs/qrcode2/0.14.1/")]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 // Lint levels of rustc.
@@ -80,7 +80,7 @@ impl QrCode {
     /// chooses the smallest QR code.
     ///
     /// ```
-    /// use qrcode::QrCode;
+    /// use qrcode2::QrCode;
     ///
     /// let code = QrCode::new(b"Some data").unwrap();
     /// ```
@@ -100,7 +100,7 @@ impl QrCode {
     /// chooses the smallest Micro QR code.
     ///
     /// ```
-    /// use qrcode::QrCode;
+    /// use qrcode2::QrCode;
     ///
     /// let code = QrCode::new_micro(b"Some data").unwrap();
     /// ```
@@ -119,7 +119,7 @@ impl QrCode {
     /// chooses the smallest rMQR code.
     ///
     /// ```
-    /// use qrcode::QrCode;
+    /// use qrcode2::QrCode;
     ///
     /// let code = QrCode::new_rect_micro(b"Some data").unwrap();
     /// ```
@@ -138,7 +138,7 @@ impl QrCode {
     /// This method automatically chooses the smallest QR code.
     ///
     /// ```
-    /// use qrcode::{EcLevel, QrCode};
+    /// use qrcode2::{EcLevel, QrCode};
     ///
     /// let code = QrCode::with_error_correction_level(b"Some data", EcLevel::H).unwrap();
     /// ```
@@ -161,7 +161,7 @@ impl QrCode {
     /// This method automatically chooses the smallest Micro QR code.
     ///
     /// ```
-    /// use qrcode::{EcLevel, QrCode};
+    /// use qrcode2::{EcLevel, QrCode};
     ///
     /// let code = QrCode::micro_with_error_correction_level(b"Some data", EcLevel::Q).unwrap();
     /// ```
@@ -184,7 +184,7 @@ impl QrCode {
     /// This method automatically chooses the smallest rMQR code.
     ///
     /// ```
-    /// use qrcode::{EcLevel, QrCode};
+    /// use qrcode2::{EcLevel, QrCode};
     ///
     /// let code = QrCode::rect_micro_with_error_correction_level(b"Some data", EcLevel::H).unwrap();
     /// ```
@@ -205,7 +205,7 @@ impl QrCode {
     /// level.
     ///
     /// ```
-    /// use qrcode::{EcLevel, QrCode, Version};
+    /// use qrcode2::{EcLevel, QrCode, Version};
     ///
     /// let code = QrCode::with_version(b"Some data", Version::Normal(5), EcLevel::M).unwrap();
     /// ```
@@ -213,7 +213,7 @@ impl QrCode {
     /// This method can also be used to generate Micro QR code or rMQR code.
     ///
     /// ```
-    /// use qrcode::{EcLevel, QrCode, Version};
+    /// use qrcode2::{EcLevel, QrCode, Version};
     ///
     /// let micro_code = QrCode::with_version(b"123", Version::Micro(1), EcLevel::L).unwrap();
     /// let rmqr_code = QrCode::with_version(b"456", Version::RectMicro(7, 43), EcLevel::M).unwrap();
@@ -249,7 +249,7 @@ impl QrCode {
     /// ```
     /// #![allow(unused_must_use)]
     ///
-    /// use qrcode::{EcLevel, QrCode, Version, bits::Bits};
+    /// use qrcode2::{EcLevel, QrCode, Version, bits::Bits};
     ///
     /// let mut bits = Bits::new(Version::Normal(1));
     /// bits.push_eci_designator(9);
@@ -381,7 +381,7 @@ impl QrCode {
     /// ```
     /// # #[cfg(feature = "image")]
     /// # {
-    /// # use qrcode::QrCode;
+    /// # use qrcode2::QrCode;
     /// # use image::Rgb;
     ///
     /// let image = QrCode::new(b"hello")

@@ -11,8 +11,8 @@
 //! # Example
 //!
 //! ```
-//! use qrcode::QrCode;
-//! use qrcode::render::svg;
+//! use qrcode2::QrCode;
+//! use qrcode2::render::svg;
 //!
 //! let code = QrCode::new(b"Hello").unwrap();
 //! let svg_xml = code.render::<svg::Color>().build();

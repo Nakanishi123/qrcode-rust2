@@ -10,12 +10,12 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 
 [package]
-name = "qrcode"
+name = "qrcode2"
 version = "0.14.1"
 edition = "2024"
 rust-version = "1.85.0"
 description = "QR code encoder in Rust"
-documentation = "https://docs.rs/qrcode"
+documentation = "https://docs.rs/qrcode2"
 repository = "https://github.com/sorairolake/qrcode-rust2"
 license = "Apache-2.0 OR MIT"
 keywords = ["qrcode", "rmqr"]

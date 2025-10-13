@@ -10,7 +10,7 @@
 
 #![cfg(feature = "pic")]
 
-use qrcode::{EcLevel, QrCode, Version, render::pic::Color};
+use qrcode2::{EcLevel, QrCode, Version, render::pic::Color};
 
 #[test]
 fn test_annex_i_qr_as_pic() {

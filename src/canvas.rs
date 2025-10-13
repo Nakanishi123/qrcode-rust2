@@ -9,7 +9,7 @@
 //! The `canvas` module puts raw bits into the QR code canvas.
 //!
 //! ```
-//! use qrcode::{
+//! use qrcode2::{
 //!     canvas::{Canvas, MaskPattern},
 //!     types::{EcLevel, Version},
 //! };
@@ -65,7 +65,7 @@ impl Module {
     /// Apply a mask to the unmasked modules.
     ///
     /// ```
-    /// use qrcode::{canvas::Module, types::Color};
+    /// use qrcode2::{canvas::Module, types::Color};
     ///
     /// assert_eq!(
     ///     Module::Unmasked(Color::Light).mask(true),

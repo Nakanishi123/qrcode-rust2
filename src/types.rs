@@ -80,7 +80,7 @@ impl Color {
     /// # Examples
     ///
     /// ```
-    /// # use qrcode::types::Color;
+    /// # use qrcode2::types::Color;
     /// assert_eq!(Color::Light.select(1, 0), 0);
     /// assert_eq!(Color::Dark.select("black", "white"), "black");
     /// ```
@@ -370,7 +370,7 @@ impl Mode {
     /// Computes the number of bits needed to encode the data length.
     ///
     /// ```
-    /// use qrcode::types::{Mode, Version};
+    /// use qrcode2::types::{Mode, Version};
     ///
     /// assert_eq!(Mode::Numeric.length_bits_count(Version::Normal(1)), 10);
     /// ```
@@ -420,7 +420,7 @@ impl Mode {
     /// Computes the number of bits needed to some data of a given raw length.
     ///
     /// ```
-    /// use qrcode::types::Mode;
+    /// use qrcode2::types::Mode;
     ///
     /// assert_eq!(Mode::Numeric.data_bits_count(7), 24);
     /// ```
@@ -440,7 +440,7 @@ impl Mode {
     /// Find the lowest common mode which both modes are compatible with.
     ///
     /// ```
-    /// use qrcode::types::Mode;
+    /// use qrcode2::types::Mode;
     ///
     /// let a = Mode::Numeric;
     /// let b = Mode::Kanji;

@@ -10,7 +10,7 @@
 
 #![cfg(feature = "svg")]
 
-use qrcode::{EcLevel, QrCode, Version, render::svg::Color};
+use qrcode2::{EcLevel, QrCode, Version, render::svg::Color};
 
 #[test]
 fn test_annex_i_qr_as_svg() {

@@ -7,8 +7,8 @@
 //! # Example
 //!
 //! ```
-//! use qrcode::QrCode;
-//! use qrcode::render::eps;
+//! use qrcode2::QrCode;
+//! use qrcode2::render::eps;
 //!
 //! let code = QrCode::new(b"Hello").unwrap();
 //! let eps = code.render::<eps::Color>().build();

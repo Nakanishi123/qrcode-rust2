@@ -10,8 +10,8 @@
 //! # Example
 //!
 //! ```
-//! use qrcode::QrCode;
-//! use qrcode::render::pic;
+//! use qrcode2::QrCode;
+//! use qrcode2::render::pic;
 //!
 //! let code = QrCode::new(b"Hello").unwrap();
 //! let pic = code.render::<pic::Color>().build();

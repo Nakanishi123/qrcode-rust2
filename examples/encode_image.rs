@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2017 kennytm
+// SPDX-FileCopyrightText: 2025 Shun Sakai
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use image::Luma;
-use qrcode::QrCode;
+use qrcode2::QrCode;
 
 fn main() {
     // Encode some data into bits.

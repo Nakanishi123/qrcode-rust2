@@ -10,7 +10,7 @@
 
 #![cfg(feature = "eps")]
 
-use qrcode::{EcLevel, QrCode, Version, render::eps::Color};
+use qrcode2::{EcLevel, QrCode, Version, render::eps::Color};
 
 #[test]
 fn test_annex_i_qr_as_eps() {

@@ -103,7 +103,7 @@ impl Parser<'_> {
     /// contains their exclusive subsets. No optimization is done at this point.
     ///
     /// ```
-    /// use qrcode::{
+    /// use qrcode2::{
     ///     optimize::{Parser, Segment},
     ///     types::Mode::{Alphanumeric, Byte, Numeric},
     /// };
