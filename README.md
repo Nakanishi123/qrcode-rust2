@@ -10,236 +10,114 @@ SPDX-FileCopyrightText: 2024 Shun Sakai
 SPDX-License-Identifier: Apache-2.0 OR MIT
 -->
 
-# qrcode-rust
+# qrcode-rust2
 
-[![Build status](https://github.com/kennytm/qrcode-rust/workflows/Rust/badge.svg)](https://github.com/kennytm/qrcode-rust/actions?query=workflow%3ARust)
-[![crates.io](https://img.shields.io/crates/v/qrcode.svg)](https://crates.io/crates/qrcode)
-[![MIT OR Apache 2.0](https://img.shields.io/badge/license-MIT%20%2f%20Apache%202.0-blue.svg)](./LICENSE-APACHE.txt)
+[![CI][ci-badge]][ci-url]
+[![Version][version-badge]][version-url]
+![MSRV][msrv-badge]
+[![Docs][docs-badge]][docs-url]
+![License][license-badge]
 
-QR code, Micro QR code and rMQR code encoder in Rust. [Documentation](https://docs.rs/qrcode).
+**qrcode-rust2** ([`qrcode2`][version-url]) is a [QR code] encoding library
+written in [Rust].
 
-## Cargo.toml
+This crate provides a QR code, Micro QR code and rMQR code encoder for binary
+data.
 
-```toml
-[dependencies]
-qrcode = "0.14.1"
+> [!IMPORTANT]
+> This is a fork of the [`qrcode`] crate.
+
+## Usage
+
+Run the following command in your project directory:
+
+```sh
+cargo add qrcode2
 ```
 
-The default settings will depend on the `image` crate. If you don't need image generation capability, disable the `default-features`:
+### Crate features
 
-```toml
-[dependencies]
-qrcode = { version = "0.14.1", default-features = false, features = ["std"] }
-```
+#### `eps`
 
-## Example
+Enables [EPS] rendering support. This is enabled by default.
 
-### Image generation
+#### `image`
 
-```rust
-use qrcode::QrCode;
-use image::Luma;
+Enables raster image rendering support powered by the [`image`] crate. This is
+enabled by default.
 
-fn main() {
-    // Encode some data into bits.
-    let code = QrCode::new(b"01234567").unwrap();
+#### `pic`
 
-    // Render the bits into an image.
-    let image = code.render::<Luma<u8>>().build();
+Enables [PIC] rendering support. This is enabled by default.
 
-    // Save the image.
-    image.save("/tmp/qrcode.png").unwrap();
-}
-```
+#### `std`
 
-Generates this image:
+Enables features that depend on the standard library. This is enabled by
+default.
 
-![Output](src/test_annex_i_qr_as_image.png)
+#### `svg`
 
-### String generation
+Enables [SVG] rendering support. This is enabled by default.
 
-```rust
-use qrcode::QrCode;
+### `no_std` support
 
-fn main() {
-    let code = QrCode::new(b"Hello").unwrap();
-    let string = code.render::<char>()
-        .dark_color('#')
-        .quiet_zone(false)
-        .module_dimensions(2, 1)
-        .build();
-    println!("{string}");
-}
-```
+This supports `no_std` mode. Disables the `default` feature to enable this.
 
-Generates this output:
+### Documentation
 
-```none
-##############    ########  ##############
-##          ##          ##  ##          ##
-##  ######  ##  ##  ##  ##  ##  ######  ##
-##  ######  ##  ##  ##      ##  ######  ##
-##  ######  ##  ####    ##  ##  ######  ##
-##          ##  ####  ##    ##          ##
-##############  ##  ##  ##  ##############
-                ##  ##
-##  ##########    ##  ##    ##########
-      ##        ##    ########    ####  ##
-    ##########    ####  ##  ####  ######
-    ##    ##  ####  ##########    ####
-  ######    ##########  ##    ##        ##
-                ##      ##    ##  ##
-##############    ##  ##  ##    ##  ####
-##          ##  ##  ##        ##########
-##  ######  ##  ##    ##  ##    ##    ##
-##  ######  ##  ####  ##########  ##
-##  ######  ##  ####    ##  ####    ##
-##          ##    ##  ########  ######
-##############  ####    ##      ##    ##
-```
+See the [documentation][docs-url] for more details.
 
-### SVG generation
+## Minimum supported Rust version
 
-```rust
-use qrcode::{QrCode, Version, EcLevel};
-use qrcode::render::svg;
+The minimum supported Rust version (MSRV) of this library is v1.85.0.
 
-fn main() {
-    let code = QrCode::with_version(b"01234567", Version::Micro(2), EcLevel::L).unwrap();
-    let image = code.render()
-        .min_dimensions(200, 200)
-        .dark_color(svg::Color("#800000"))
-        .light_color(svg::Color("#ffff80"))
-        .build();
-    println!("{image}");
-}
-```
+## Source code
 
-Generates this SVG:
+The upstream repository is available at
+<https://github.com/sorairolake/qrcode-rust2.git>.
 
-[![Output](src/test_annex_i_micro_qr_as_svg.svg)](src/test_annex_i_micro_qr_as_svg.svg)
+## Changelog
 
-### Unicode string generation
+Please see [CHANGELOG.adoc].
 
-```rust
-use qrcode::QrCode;
-use qrcode::render::unicode;
+## Contributing
 
-fn main() {
-    let code = QrCode::new("mow mow").unwrap();
-    let image = code.render::<unicode::Dense1x2>()
-        .dark_color(unicode::Dense1x2::Light)
-        .light_color(unicode::Dense1x2::Dark)
-        .build();
-    println!("{image}");
-}
-```
+Please see [CONTRIBUTING.adoc].
 
-Generates this output:
+## Acknowledgment
 
-```text
-█████████████████████████████
-█████████████████████████████
-████ ▄▄▄▄▄ █ ▀▀▀▄█ ▄▄▄▄▄ ████
-████ █   █ █▀ ▀ ▀█ █   █ ████
-████ █▄▄▄█ ██▄  ▀█ █▄▄▄█ ████
-████▄▄▄▄▄▄▄█ ▀▄▀ █▄▄▄▄▄▄▄████
-████▄▀ ▄▀ ▄ █▄█  ▀ ▀█ █▄ ████
-████▄██▄▄▀▄▄▀█▄ ██▀▀█▀▄▄▄████
-█████▄▄▄█▄▄█  ▀▀▄█▀▀▀▄█▄▄████
-████ ▄▄▄▄▄ █   ▄▄██▄ ▄ ▀▀████
-████ █   █ █▀▄▄▀▄▄ ▄▄▄▄ ▄████
-████ █▄▄▄█ █▄  █▄▀▄▀██▄█▀████
-████▄▄▄▄▄▄▄█▄████▄█▄██▄██████
-█████████████████████████████
-▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-```
-
-### PIC generation
-
-```rust
-use qrcode::render::pic;
-use qrcode::QrCode;
-
-fn main() {
-    let code = QrCode::new(b"01234567").unwrap();
-    let image = code
-        .render::<pic::Color>()
-        .min_dimensions(1, 1)
-        .build();
-    println!("{image}");
-}
-```
-
-Generates [PIC](<https://en.wikipedia.org/wiki/PIC_(markup_language)>)
-output that renders as follows:
-
-```pic
-maxpswid=29;maxpsht=29;movewid=0;moveht=1;boxwid=1;boxht=1
-define p { box wid $3 ht $4 fill 1 thickness 0.1 with .nw at $1,-$2 }
-box wid maxpswid ht maxpsht with .nw at 0,0
-p(4,4,1,1)
-p(5,4,1,1)
-p(6,4,1,1)
-p(7,4,1,1)
-p(8,4,1,1)
-p(9,4,1,1)
-…
-```
-
-See [`test_annex_i_micro_qr_as_pic.pic`](src/test_annex_i_micro_qr_as_pic.pic) for a full example.
-
-### EPS generation
-
-```rust
-use qrcode::render::eps;
-use qrcode::{EcLevel, QrCode, Version};
-
-fn main() {
-    let code = QrCode::with_version(b"01234567", Version::Micro(2), EcLevel::L).unwrap();
-    let image = code
-        .render()
-        .min_dimensions(200, 200)
-        .dark_color(eps::Color([0.5, 0.0, 0.0]))
-        .light_color(eps::Color([1.0, 1.0, 0.5]))
-        .build();
-    println!("{image}");
-}
-```
-
-Generates [EPS](https://en.wikipedia.org/wiki/Encapsulated_PostScript)
-output that renders as follows:
-
-```postscript
-%!PS-Adobe-3.0 EPSF-3.0
-%%BoundingBox: 0 0 204 204
-%%Pages: 1
-%%EndComments
-gsave
-1 1 0.5 setrgbcolor
-0 0 204 204 rectfill
-grestore
-0.5 0 0 setrgbcolor
-24 180 12 12 rectfill
-36 180 12 12 rectfill
-48 180 12 12 rectfill
-60 180 12 12 rectfill
-72 180 12 12 rectfill
-84 180 12 12 rectfill
-…
-```
-
-See [`test_annex_i_micro_qr_as_eps.eps`](src/test_annex_i_micro_qr_as_eps.eps) for a full example.
+The rMQR code encoder is based on the [`qrqrpar`] crate. It is licensed under
+the [BSD 3-Clause "New" or "Revised" License].
 
 ## License
 
-Copyright (c) 2016 kennytm
+Copyright (C) 2016 kennytm and contributors (see [AUTHORS.adoc])
 
-This crate is licensed under either of the
-[MIT License](https://spdx.org/licenses/MIT.html) or the
-[Apache License 2.0](https://spdx.org/licenses/Apache-2.0.html) at your option.
+This library is distributed under the terms of either the _Apache License 2.0_
+or the _MIT License_.
 
-The rMQR code encoder is based on the
-[`qrqrpar`](https://crates.io/crates/qrqrpar) crate, which is a fork of this
-crate. It is licensed under the
-[BSD 3-Clause "New" or "Revised" License](https://spdx.org/licenses/BSD-3-Clause.html).
+This project is compliant with version 3.3 of the [_REUSE Specification_]. See
+copyright notices of individual files for more details on copyright and
+licensing information.
+
+[ci-badge]: https://img.shields.io/github/actions/workflow/status/sorairolake/qrcode-rust2/CI.yaml?branch=master&style=for-the-badge&logo=github&label=CI
+[ci-url]: https://github.com/sorairolake/qrcode-rust2/actions?query=branch%3Amaster+workflow%3ACI++
+[version-badge]: https://img.shields.io/crates/v/qrcode2?style=for-the-badge&logo=rust
+[version-url]: https://crates.io/crates/qrcode2
+[msrv-badge]: https://img.shields.io/crates/msrv/qrcode2?style=for-the-badge&logo=rust
+[docs-badge]: https://img.shields.io/docsrs/qrcode2?style=for-the-badge&logo=docsdotrs&label=Docs.rs
+[docs-url]: https://docs.rs/qrcode2
+[license-badge]: https://img.shields.io/crates/l/qrcode2?style=for-the-badge
+[QR code]: https://www.qrcode.com/
+[Rust]: https://www.rust-lang.org/
+[`qrcode`]: https://crates.io/crates/qrcode
+[EPS]: https://en.wikipedia.org/wiki/Encapsulated_PostScript
+[`image`]: https://crates.io/crates/image
+[PIC]: https://en.wikipedia.org/wiki/PIC_(markup_language)
+[SVG]: https://www.w3.org/Graphics/SVG/
+[CHANGELOG.adoc]: CHANGELOG.adoc
+[CONTRIBUTING.adoc]: CONTRIBUTING.adoc
+[`qrqrpar`]: https://crates.io/crates/qrqrpar
+[BSD 3-Clause "New" or "Revised" License]: https://spdx.org/licenses/BSD-3-Clause.html
+[AUTHORS.adoc]: AUTHORS.adoc
+[_REUSE Specification_]: https://reuse.software/spec-3.3/
