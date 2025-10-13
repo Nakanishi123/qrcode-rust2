@@ -37,15 +37,12 @@
 //! ```
 
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(feature = "bench", feature(test))] // Unstable libraries
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(missing_docs)]
 #![warn(clippy::pedantic)]
 #![allow(
     clippy::must_use_candidate, // This is just annoying.
 )]
-#![cfg_attr(feature = "bench", doc = include_str!("../README.md"))]
-// ^ make sure we can test our README.md.
 
 extern crate alloc;
 

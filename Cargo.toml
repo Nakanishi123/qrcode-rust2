@@ -39,7 +39,6 @@ image = "0.25"
 default = ["std", "image", "svg", "pic", "eps"]
 image = ["dep:image", "std"]
 std = []
-bench = []
 svg = []
 pic = []
 eps = []
