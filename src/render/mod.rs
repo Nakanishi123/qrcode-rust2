@@ -162,8 +162,8 @@ impl<'a, P: Pixel> Renderer<'a, P> {
         let quiet_zone = if self.has_quiet_zone { 2 } else { 0 } * self.quiet_zone;
         let width_in_modules = self.horizontal_modules_count + quiet_zone;
         let height_in_modules = self.vertical_modules_count + quiet_zone;
-        let unit_width = (width + width_in_modules - 1) / width_in_modules;
-        let unit_height = (height + height_in_modules - 1) / height_in_modules;
+        let unit_width = width.div_ceil(width_in_modules);
+        let unit_height = height.div_ceil(height_in_modules);
         self.module_dimensions(unit_width, unit_height)
     }
 
