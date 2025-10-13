@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Vladimir Serov
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 //! UTF-8 rendering, with 2 pixels per symbol.
 
 use crate::render::{Canvas as RenderCanvas, Color, Pixel};

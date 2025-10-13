@@ -1,3 +1,10 @@
+// SPDX-FileCopyrightText: 2017 Jovansonlee Cesar
+// SPDX-FileCopyrightText: 2017 kennytm
+// SPDX-FileCopyrightText: 2024 Michael Spiegel
+// SPDX-FileCopyrightText: 2025 Shun Sakai
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 //! String rendering support.
 
 use crate::cast::As;

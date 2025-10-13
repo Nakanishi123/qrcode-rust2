@@ -1,3 +1,10 @@
+// SPDX-FileCopyrightText: 2024 Alexis Hildebrandt
+// SPDX-FileCopyrightText: 2024 Michael Spiegel
+// SPDX-FileCopyrightText: 2024 Shun Sakai
+// SPDX-FileCopyrightText: 2024 kennytm
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 //! PIC rendering support.
 //!
 //! # Example

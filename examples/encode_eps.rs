@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Shun Sakai
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use qrcode::render::eps;
 use qrcode::{EcLevel, QrCode, Version};
 

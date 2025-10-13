@@ -1,3 +1,14 @@
+# SPDX-FileCopyrightText: 2014 kennytm
+# SPDX-FileCopyrightText: 2018 Ignas Anikevicius
+# SPDX-FileCopyrightText: 2018 Kyle Clemens
+# SPDX-FileCopyrightText: 2019 Igor Gnatenko
+# SPDX-FileCopyrightText: 2019 Jasper Bryant-Greene
+# SPDX-FileCopyrightText: 2024 Alexis Hildebrandt
+# SPDX-FileCopyrightText: 2024 Michael Spiegel
+# SPDX-FileCopyrightText: 2024 Shun Sakai
+#
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+
 [package]
 name = "qrcode"
 description = "QR code encoder in Rust"

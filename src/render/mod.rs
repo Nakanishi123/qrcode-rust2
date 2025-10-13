@@ -1,3 +1,11 @@
+// SPDX-FileCopyrightText: 2017 kennytm
+// SPDX-FileCopyrightText: 2020 Vladimir Serov
+// SPDX-FileCopyrightText: 2024 Alexis Hildebrandt
+// SPDX-FileCopyrightText: 2024 Michael Spiegel
+// SPDX-FileCopyrightText: 2024 Shun Sakai
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 //! Render a QR code into image.
 
 use crate::cast::As;

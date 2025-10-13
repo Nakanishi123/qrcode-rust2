@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 kennytm
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 pub trait Truncate {
     fn truncate_as_u8(self) -> u8;
 }

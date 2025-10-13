@@ -1,3 +1,11 @@
+// SPDX-FileCopyrightText: 2017 kennytm
+// SPDX-FileCopyrightText: 2018 Kyle Clemens
+// SPDX-FileCopyrightText: 2019 Markus Kohlhase
+// SPDX-FileCopyrightText: 2024 Michael Spiegel
+// SPDX-FileCopyrightText: 2024 Shun Sakai
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 //! SVG rendering support.
 //!
 //! # Example

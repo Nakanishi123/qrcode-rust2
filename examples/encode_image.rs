@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 kennytm
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use image::Luma;
 use qrcode::QrCode;
 

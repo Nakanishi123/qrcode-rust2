@@ -1,3 +1,11 @@
+// SPDX-FileCopyrightText: 2014 kennytm
+// SPDX-FileCopyrightText: 2018 Ignas Anikevicius
+// SPDX-FileCopyrightText: 2019 Atul Bhosale
+// SPDX-FileCopyrightText: 2024 Michael Spiegel
+// SPDX-FileCopyrightText: 2024 Shun Sakai
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 //! The `canvas` module puts raw bits into the QR code canvas.
 //!
 //! ```

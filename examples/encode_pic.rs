@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2024 Alexis Hildebrandt
+// SPDX-FileCopyrightText: 2024 Shun Sakai
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use qrcode::QrCode;
 use qrcode::render::pic;
 

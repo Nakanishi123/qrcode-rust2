@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2014 kennytm
+#
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+
 /target
 *.swp
 *.swo

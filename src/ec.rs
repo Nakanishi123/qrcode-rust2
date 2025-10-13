@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: 2014 kennytm
+// SPDX-FileCopyrightText: 2024 Michael Spiegel
+// SPDX-FileCopyrightText: 2024 Shun Sakai
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 //! The `ec` module applies the Reed-Solomon error correction codes.
 
 use alloc::vec::Vec;

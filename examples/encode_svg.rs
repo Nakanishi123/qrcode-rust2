@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2017 kennytm
+// SPDX-FileCopyrightText: 2024 Shun Sakai
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use qrcode::render::svg;
 use qrcode::{EcLevel, QrCode, Version};
 
