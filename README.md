@@ -10,8 +10,7 @@ SPDX-FileCopyrightText: 2024 Shun Sakai
 SPDX-License-Identifier: Apache-2.0 OR MIT
 -->
 
-qrcode-rust
-===========
+# qrcode-rust
 
 [![Build status](https://github.com/kennytm/qrcode-rust/workflows/Rust/badge.svg)](https://github.com/kennytm/qrcode-rust/actions?query=workflow%3ARust)
 [![crates.io](https://img.shields.io/crates/v/qrcode.svg)](https://crates.io/crates/qrcode)
@@ -19,8 +18,7 @@ qrcode-rust
 
 QR code, Micro QR code and rMQR code encoder in Rust. [Documentation](https://docs.rs/qrcode).
 
-Cargo.toml
-----------
+## Cargo.toml
 
 ```toml
 [dependencies]
@@ -34,8 +32,7 @@ The default settings will depend on the `image` crate. If you don't need image g
 qrcode = { version = "0.14.1", default-features = false, features = ["std"] }
 ```
 
-Example
--------
+## Example
 
 ### Image generation
 
@@ -174,7 +171,7 @@ fn main() {
 }
 ```
 
-Generates [PIC](https://en.wikipedia.org/wiki/PIC_(markup_language))
+Generates [PIC](<https://en.wikipedia.org/wiki/PIC_(markup_language)>)
 output that renders as follows:
 
 ```pic
@@ -189,6 +186,7 @@ p(8,4,1,1)
 p(9,4,1,1)
 …
 ```
+
 See [`test_annex_i_micro_qr_as_pic.pic`](src/test_annex_i_micro_qr_as_pic.pic) for a full example.
 
 ### EPS generation
@@ -230,10 +228,10 @@ grestore
 84 180 12 12 rectfill
 …
 ```
+
 See [`test_annex_i_micro_qr_as_eps.eps`](src/test_annex_i_micro_qr_as_eps.eps) for a full example.
 
-License
--------
+## License
 
 Copyright (c) 2016 kennytm
 
