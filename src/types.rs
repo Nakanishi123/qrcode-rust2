@@ -156,11 +156,7 @@ impl Version {
     ///
     /// Except for rMQR code, the height is the same as the width.
     pub const fn height(self) -> i16 {
-        if let Self::RectMicro(h, _) = self {
-            h
-        } else {
-            self.width()
-        }
+        if let Self::RectMicro(h, _) = self { h } else { self.width() }
     }
 
     /// Obtains an object from a hard-coded table.
