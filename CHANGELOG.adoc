@@ -1,0 +1,39 @@
+// SPDX-FileCopyrightText: 2025 Shun Sakai
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
+= Changelog
+:toc: preamble
+:project-url: https://github.com/sorairolake/qrcode-rust2
+:compare-url: {project-url}/compare
+:issue-url: {project-url}/issues
+:pull-request-url: {project-url}/pull
+
+All notable changes to this project will be documented in this file.
+
+The format is based on https://keepachangelog.com/[Keep a Changelog], and this
+project adheres to https://semver.org/[Semantic Versioning].
+
+== {compare-url}/v0.14.1\...HEAD[Unreleased]
+
+=== Added
+
+* Support `no_std` mode
+* Add EPS rendering support
+* Add rMQR code encoder
+* Support automatic determines the smallest Micro QR code
+
+=== Changed
+
+* Improve rendered PIC quality
+* Change XML declaration of SVG
+* Reduce size of SVG output
+* Change MSRV to 1.85.0
+* Change behavior of `Version::is_micro` to return `false` if the parameter is
+  out of the valid range
+* Rename crate to `qrcode2`
+
+=== Removed
+
+* Remove binary target
+* Remove `bench` feature

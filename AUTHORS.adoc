@@ -1,0 +1,32 @@
+// SPDX-FileCopyrightText: 2025 Shun Sakai
+//
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
+= List of Authors
+
+== Original author
+
+* https://github.com/kennytm[kennytm]
+
+== Maintainers
+
+* https://github.com/sorairolake[Shun Sakai]
+
+== Contributors
+
+* https://github.com/afh[Alexis Hildebrandt]
+* https://github.com/Atul9[Atul Bhosale]
+* https://github.com/cab404[Cabia Rangris]
+* Ethan Pailes
+* https://github.com/aignas[Ignas Anikevicius]
+* https://github.com/igor-raits[Igor Gnatenko]
+* https://github.com/parrotmac[Isaac Parker]
+* https://github.com/pickfire[Ivan Tham]
+* https://github.com/jbg[Jasper Bryant-Greene]
+* https://github.com/ivanceras[Jovansonlee Cesar]
+* Kyle Clemens
+* https://github.com/flosse[Markus Kohlhase]
+* https://github.com/mspiegel[Michael Spiegel]
+* https://github.com/Stebalien[Steven Allen]
+* https://github.com/svenstaro[Sven-Hendrik Haase]
+* https://github.com/cab404[Vladimir Serov]
