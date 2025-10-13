@@ -476,7 +476,8 @@ mod image_tests {
     fn test_annex_i_qr_as_image() {
         let code = QrCode::new(b"01234567").unwrap();
         let image = code.render::<Luma<u8>>().build();
-        let expected = load_from_memory(include_bytes!("test_annex_i_qr_as_image.png")).unwrap().into_luma8();
+        let expected =
+            load_from_memory(include_bytes!("../tests/data/test_annex_i_qr_as_image.png")).unwrap().into_luma8();
         assert_eq!(image.dimensions(), expected.dimensions());
         assert_eq!(image.into_raw(), expected.into_raw());
     }
@@ -490,7 +491,8 @@ mod image_tests {
             .dark_color(Rgb([128, 0, 0]))
             .light_color(Rgb([255, 255, 128]))
             .build();
-        let expected = load_from_memory(include_bytes!("test_annex_i_micro_qr_as_image.png")).unwrap().into_rgb8();
+        let expected =
+            load_from_memory(include_bytes!("../tests/data/test_annex_i_micro_qr_as_image.png")).unwrap().into_rgb8();
         assert_eq!(image.dimensions(), expected.dimensions());
         assert_eq!(image.into_raw(), expected.into_raw());
     }
@@ -499,7 +501,8 @@ mod image_tests {
     fn test_annex_i_rmqr_as_image() {
         let code = QrCode::with_version(b"01234567", Version::RectMicro(15, 43), EcLevel::M).unwrap();
         let image = code.render::<Luma<u8>>().build();
-        let expected = load_from_memory(include_bytes!("test_annex_i_rmqr_as_image.png")).unwrap().into_luma8();
+        let expected =
+            load_from_memory(include_bytes!("../tests/data/test_annex_i_rmqr_as_image.png")).unwrap().into_luma8();
         assert_eq!(image.dimensions(), expected.dimensions());
         assert_eq!(image.into_raw(), expected.into_raw());
     }
@@ -514,7 +517,7 @@ mod svg_tests {
     fn test_annex_i_qr_as_svg() {
         let code = QrCode::new(b"01234567").unwrap();
         let image = code.render::<SvgColor>().build();
-        let expected = include_str!("test_annex_i_qr_as_svg.svg");
+        let expected = include_str!("../tests/data/test_annex_i_qr_as_svg.svg");
         assert_eq!(&image, expected);
     }
 
@@ -527,7 +530,7 @@ mod svg_tests {
             .dark_color(SvgColor("#800000"))
             .light_color(SvgColor("#ffff80"))
             .build();
-        let expected = include_str!("test_annex_i_micro_qr_as_svg.svg");
+        let expected = include_str!("../tests/data/test_annex_i_micro_qr_as_svg.svg");
         assert_eq!(&image, expected);
     }
 
@@ -535,7 +538,7 @@ mod svg_tests {
     fn test_annex_i_rmqr_as_svg() {
         let code = QrCode::with_version(b"01234567", Version::RectMicro(15, 43), EcLevel::M).unwrap();
         let image = code.render::<SvgColor>().build();
-        let expected = include_str!("test_annex_i_rmqr_as_svg.svg");
+        let expected = include_str!("../tests/data/test_annex_i_rmqr_as_svg.svg");
         assert_eq!(&image, expected);
     }
 }
@@ -549,7 +552,7 @@ mod pic_tests {
     fn test_annex_i_qr_as_pic() {
         let code = QrCode::new(b"01234567").unwrap();
         let image = code.render::<PicColor>().build();
-        let expected = include_str!("test_annex_i_qr_as_pic.pic");
+        let expected = include_str!("../tests/data/test_annex_i_qr_as_pic.pic");
         assert_eq!(&image, expected);
     }
 
@@ -557,7 +560,7 @@ mod pic_tests {
     fn test_annex_i_micro_qr_as_pic() {
         let code = QrCode::with_version(b"01234567", Version::Micro(2), EcLevel::L).unwrap();
         let image = code.render::<PicColor>().min_dimensions(1, 1).build();
-        let expected = include_str!("test_annex_i_micro_qr_as_pic.pic");
+        let expected = include_str!("../tests/data/test_annex_i_micro_qr_as_pic.pic");
         assert_eq!(&image, expected);
     }
 
@@ -565,7 +568,7 @@ mod pic_tests {
     fn test_annex_i_rmqr_as_pic() {
         let code = QrCode::with_version(b"01234567", Version::RectMicro(15, 43), EcLevel::M).unwrap();
         let image = code.render::<PicColor>().build();
-        let expected = include_str!("test_annex_i_rmqr_as_pic.pic");
+        let expected = include_str!("../tests/data/test_annex_i_rmqr_as_pic.pic");
         assert_eq!(&image, expected);
     }
 }
@@ -579,7 +582,7 @@ mod eps_tests {
     fn test_annex_i_qr_as_eps() {
         let code = QrCode::new(b"01234567").unwrap();
         let image = code.render::<EpsColor>().build();
-        let expected = include_str!("test_annex_i_qr_as_eps.eps");
+        let expected = include_str!("../tests/data/test_annex_i_qr_as_eps.eps");
         assert_eq!(&image, expected);
     }
 
@@ -592,7 +595,7 @@ mod eps_tests {
             .dark_color(EpsColor([0.5, 0.0, 0.0]))
             .light_color(EpsColor([1.0, 1.0, 0.5]))
             .build();
-        let expected = include_str!("test_annex_i_micro_qr_as_eps.eps");
+        let expected = include_str!("../tests/data/test_annex_i_micro_qr_as_eps.eps");
         assert_eq!(&image, expected);
     }
 
@@ -600,7 +603,7 @@ mod eps_tests {
     fn test_annex_i_rmqr_as_eps() {
         let code = QrCode::with_version(b"01234567", Version::RectMicro(15, 43), EcLevel::M).unwrap();
         let image = code.render::<EpsColor>().build();
-        let expected = include_str!("test_annex_i_rmqr_as_eps.eps");
+        let expected = include_str!("../tests/data/test_annex_i_rmqr_as_eps.eps");
         assert_eq!(&image, expected);
     }
 }
