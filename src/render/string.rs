@@ -55,6 +55,7 @@ impl Element for &str {
     }
 }
 
+#[derive(Debug)]
 #[doc(hidden)]
 pub struct Canvas<P: Element> {
     buffer: Vec<P>,

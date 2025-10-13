@@ -18,7 +18,7 @@ use core::ops::Not;
 //{{{ QrResult
 
 /// `QrError` encodes the error encountered when generating a QR code.
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum QrError {
     /// The data is too long to encode into a QR code for the given version.
     DataTooLong,
@@ -39,7 +39,7 @@ pub enum QrError {
 }
 
 impl Display for QrError {
-    fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), Error> {
         let msg = match *self {
             Self::DataTooLong => "data too long",
             Self::InvalidVersion => "invalid version",
@@ -62,7 +62,7 @@ pub type QrResult<T> = Result<T, QrError>;
 //{{{ Color
 
 /// The color of a module.
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Color {
     /// The module is light colored.
     Light,
@@ -105,7 +105,7 @@ impl Not for Color {
 
 /// The error correction level. It allows the original information be recovered
 /// even if parts of the code is damaged.
-#[derive(Debug, PartialEq, Eq, Copy, Clone, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum EcLevel {
     /// Low error correction. Allows up to 7% of wrong blocks.
     L = 0,
@@ -130,7 +130,7 @@ pub enum EcLevel {
 ///
 /// The smallest version is `Version::Normal(1)` of size 21×21, and the largest
 /// is `Version::Normal(40)` of size 177×177.
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Version {
     /// A normal QR code version. The parameter should be between 1 and 40.
     Normal(i16),
@@ -150,6 +150,7 @@ impl Version {
     /// QR code, i.e. the width of the code.
     ///
     /// Except for rMQR code, the width is the same as the height.
+    #[must_use]
     pub const fn width(self) -> i16 {
         match self {
             Self::Normal(v) => v * 4 + 17,
@@ -162,6 +163,7 @@ impl Version {
     /// code, i.e. the height of the code.
     ///
     /// Except for rMQR code, the height is the same as the width.
+    #[must_use]
     pub const fn height(self) -> i16 {
         if let Self::RectMicro(h, _) = self { h } else { self.width() }
     }
@@ -205,6 +207,7 @@ impl Version {
     }
 
     /// The number of bits needed to encode the mode indicator.
+    #[must_use]
     pub fn mode_bits_count(self) -> usize {
         match self {
             Self::Normal(_) => 4,
@@ -214,16 +217,19 @@ impl Version {
     }
 
     /// Checks whether is version refers to a normal QR code.
+    #[must_use]
     pub const fn is_normal(self) -> bool {
         matches!(self, Self::Normal(version) if version >= 1 && version <= 40)
     }
 
     /// Checks whether is version refers to a Micro QR code.
+    #[must_use]
     pub const fn is_micro(self) -> bool {
         matches!(self, Self::Micro(version) if version >= 1 && version <= 4)
     }
 
     /// Checks whether is version refers to a rMQR code.
+    #[must_use]
     pub const fn is_rect_micro(self) -> bool {
         self.rect_micro_index().is_ok()
     }
@@ -337,7 +343,7 @@ mod version_tests {
 //{{{ Mode indicator
 
 /// The mode indicator, which specifies the character set of the encoded data.
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Mode {
     /// The data contains only characters 0 to 9.
     Numeric,
@@ -364,6 +370,7 @@ impl Mode {
     ///
     /// This method will return `Err(QrError::UnsupportedCharacterSet)` if the
     /// mode is not supported in the given version.
+    #[must_use]
     pub fn length_bits_count(self, version: Version) -> usize {
         match version {
             Version::Micro(a) => {
@@ -413,6 +420,7 @@ impl Mode {
     ///
     /// Note that in Kanji mode, the `raw_data_len` is the number of Kanjis,
     /// i.e. half the total size of bytes.
+    #[must_use]
     pub const fn data_bits_count(self, raw_data_len: usize) -> usize {
         match self {
             Self::Numeric => (raw_data_len * 10).div_ceil(3),

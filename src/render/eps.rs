@@ -26,7 +26,7 @@ use crate::types::Color as ModuleColor;
 /// An EPS color (`[R, G, B]`).
 ///
 /// Each value must be in the range of 0.0 to 1.0.
-#[derive(Copy, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, PartialOrd)]
 pub struct Color(pub [f64; 3]);
 
 impl Pixel for Color {
@@ -38,6 +38,7 @@ impl Pixel for Color {
     }
 }
 
+#[derive(Debug)]
 #[doc(hidden)]
 pub struct Canvas {
     eps: String,

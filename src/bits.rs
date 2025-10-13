@@ -18,6 +18,7 @@ use crate::types::{EcLevel, Mode, QrError, QrResult, Version};
 //{{{ Bits
 
 /// The `Bits` structure stores the encoded data for a QR code.
+#[derive(Debug)]
 pub struct Bits {
     data: Vec<u8>,
     bit_offset: usize,
@@ -26,6 +27,7 @@ pub struct Bits {
 
 impl Bits {
     /// Constructs a new, empty bits structure.
+    #[must_use]
     pub const fn new(version: Version) -> Self {
         Self { data: Vec::new(), bit_offset: 0, version }
     }
@@ -84,16 +86,19 @@ impl Bits {
     }
 
     /// Convert the bits into a bytes vector.
+    #[must_use]
     pub fn into_bytes(self) -> Vec<u8> {
         self.data
     }
 
     /// Total number of bits currently pushed.
+    #[must_use]
     pub fn len(&self) -> usize {
         if self.bit_offset == 0 { self.data.len() * 8 } else { (self.data.len() - 1) * 8 + self.bit_offset }
     }
 
     /// Whether there are any bits pushed.
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
@@ -111,6 +116,7 @@ impl Bits {
     }
 
     /// Version of the QR code.
+    #[must_use]
     pub const fn version(&self) -> Version {
         self.version
     }
@@ -124,25 +130,25 @@ fn test_push_number() {
     bits.push_number(3, 0b010); // 0:0 .. 0:3
     bits.push_number(3, 0b110); // 0:3 .. 0:6
     bits.push_number(3, 0b101); // 0:6 .. 1:1
-    bits.push_number(7, 0b0011010); // 1:1 .. 2:0
+    bits.push_number(7, 0b001_1010); // 1:1 .. 2:0
     bits.push_number(4, 0b1100); // 2:0 .. 2:4
-    bits.push_number(12, 0b101101101101); // 2:4 .. 4:0
-    bits.push_number(10, 0b0110010001); // 4:0 .. 5:2
-    bits.push_number(15, 0b111001011100011); // 5:2 .. 7:1
+    bits.push_number(12, 0b1011_0110_1101); // 2:4 .. 4:0
+    bits.push_number(10, 0b01_1001_0001); // 4:0 .. 5:2
+    bits.push_number(15, 0b111_0010_1110_0011); // 5:2 .. 7:1
 
     let bytes = bits.into_bytes();
 
     assert_eq!(
         bytes,
         vec![
-            0b01011010, // 90
-            0b10011010, // 154
-            0b11001011, // 203
-            0b01101101, // 109
-            0b01100100, // 100
-            0b01111001, // 121
-            0b01110001, // 113
-            0b10000000, // 128
+            0b0101_1010, // 90
+            0b1001_1010, // 154
+            0b1100_1011, // 203
+            0b0110_1101, // 109
+            0b0110_0100, // 100
+            0b0111_1001, // 121
+            0b0111_0001, // 113
+            0b1000_0000, // 128
         ]
     );
 }
@@ -153,7 +159,7 @@ fn test_push_number() {
 
 /// An "extended" mode indicator, includes all indicators supported by QR code
 /// beyond those bearing data.
-#[derive(Copy, Clone)]
+#[derive(Clone, Copy, Debug)]
 pub enum ExtendedMode {
     /// ECI mode indicator, to introduce an ECI designator.
     Eci,
@@ -263,7 +269,7 @@ impl Bits {
                 self.push_number(2, 0b10);
                 self.push_number(14, eci_designator.as_u16());
             }
-            16384..=999999 => {
+            16384..=999_999 => {
                 self.push_number(3, 0b110);
                 self.push_number(5, (eci_designator >> 16).as_u16());
                 self.push_number(16, (eci_designator & 0xffff).as_u16());
@@ -284,27 +290,27 @@ mod eci_tests {
     fn test_9() {
         let mut bits = Bits::new(Version::Normal(1));
         assert_eq!(bits.push_eci_designator(9), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b01110000, 0b10010000]);
+        assert_eq!(bits.into_bytes(), vec![0b0111_0000, 0b1001_0000]);
     }
 
     #[test]
     fn test_899() {
         let mut bits = Bits::new(Version::Normal(1));
         assert_eq!(bits.push_eci_designator(899), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b01111000, 0b00111000, 0b00110000]);
+        assert_eq!(bits.into_bytes(), vec![0b0111_1000, 0b0011_1000, 0b0011_0000]);
     }
 
     #[test]
-    fn test_999999() {
+    fn test_999_999() {
         let mut bits = Bits::new(Version::Normal(1));
-        assert_eq!(bits.push_eci_designator(999999), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b01111100, 0b11110100, 0b00100011, 0b11110000]);
+        assert_eq!(bits.push_eci_designator(999_999), Ok(()));
+        assert_eq!(bits.into_bytes(), vec![0b0111_1100, 0b1111_0100, 0b0010_0011, 0b1111_0000]);
     }
 
     #[test]
     fn test_invalid_designator() {
         let mut bits = Bits::new(Version::Normal(1));
-        assert_eq!(bits.push_eci_designator(1000000), Err(QrError::InvalidEciDesignator));
+        assert_eq!(bits.push_eci_designator(1_000_000), Err(QrError::InvalidEciDesignator));
     }
 
     #[test]
@@ -355,7 +361,10 @@ mod numeric_tests {
     fn test_iso_18004_2006_example_1() {
         let mut bits = Bits::new(Version::Normal(1));
         assert_eq!(bits.push_numeric_data(b"01234567"), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b00010000, 0b00100000, 0b00001100, 0b01010110, 0b01100001, 0b10000000]);
+        assert_eq!(
+            bits.into_bytes(),
+            vec![0b0001_0000, 0b0010_0000, 0b0000_1100, 0b0101_0110, 0b0110_0001, 0b1000_0000]
+        );
     }
 
     #[test]
@@ -365,8 +374,15 @@ mod numeric_tests {
         assert_eq!(
             bits.into_bytes(),
             vec![
-                0b00010000, 0b01000000, 0b00001100, 0b01010110, 0b01101010, 0b01101110, 0b00010100, 0b11101010,
-                0b01010000,
+                0b0001_0000,
+                0b0100_0000,
+                0b0000_1100,
+                0b0101_0110,
+                0b0110_1010,
+                0b0110_1110,
+                0b0001_0100,
+                0b1110_1010,
+                0b0101_0000,
             ]
         );
     }
@@ -377,7 +393,16 @@ mod numeric_tests {
         assert_eq!(bits.push_numeric_data(b"0123456789012345"), Ok(()));
         assert_eq!(
             bits.into_bytes(),
-            vec![0b00100000, 0b00000110, 0b00101011, 0b00110101, 0b00110111, 0b00001010, 0b01110101, 0b00101000,]
+            vec![
+                0b0010_0000,
+                0b0000_0110,
+                0b0010_1011,
+                0b0011_0101,
+                0b0011_0111,
+                0b0000_1010,
+                0b0111_0101,
+                0b0010_1000,
+            ]
         );
     }
 
@@ -445,7 +470,10 @@ mod alphanumeric_tests {
     fn test_iso_18004_2006_example() {
         let mut bits = Bits::new(Version::Normal(1));
         assert_eq!(bits.push_alphanumeric_data(b"AC-42"), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b00100000, 0b00101001, 0b11001110, 0b11100111, 0b00100001, 0b00000000]);
+        assert_eq!(
+            bits.into_bytes(),
+            vec![0b0010_0000, 0b0010_1001, 0b1100_1110, 0b1110_0111, 0b0010_0001, 0b0000_0000]
+        );
     }
 
     #[test]
@@ -493,8 +521,16 @@ mod byte_tests {
         assert_eq!(
             bits.into_bytes(),
             vec![
-                0b01000000, 0b10000001, 0b00100011, 0b01000101, 0b01100111, 0b10001001, 0b10101011, 0b11001101,
-                0b11101111, 0b00000000,
+                0b0100_0000,
+                0b1000_0001,
+                0b0010_0011,
+                0b0100_0101,
+                0b0110_0111,
+                0b1000_1001,
+                0b1010_1011,
+                0b1100_1101,
+                0b1110_1111,
+                0b0000_0000,
             ]
         );
     }
@@ -550,7 +586,7 @@ mod kanji_tests {
     fn test_iso_18004_example() {
         let mut bits = Bits::new(Version::Normal(1));
         assert_eq!(bits.push_kanji_data(b"\x93\x5f\xe4\xaa"), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b10000000, 0b00100110, 0b11001111, 0b11101010, 0b10101000]);
+        assert_eq!(bits.into_bytes(), vec![0b1000_0000, 0b0010_0110, 0b1100_1111, 0b1110_1010, 0b1010_1000]);
     }
 
     #[test]
@@ -747,7 +783,7 @@ impl Bits {
         }
 
         if self.len() < data_length {
-            const PADDING_BYTES: &[u8] = &[0b11101100, 0b00010001];
+            const PADDING_BYTES: &[u8] = &[0b1110_1100, 0b0001_0001];
 
             self.bit_offset = 0;
             let data_bytes_length = data_length / 8;
@@ -778,8 +814,19 @@ mod finish_tests {
         assert_eq!(
             bits.into_bytes(),
             vec![
-                0b00100000, 0b01011011, 0b00001011, 0b01111000, 0b11010001, 0b01110010, 0b11011100, 0b01001101,
-                0b01000011, 0b01000000, 0b11101100, 0b00010001, 0b11101100,
+                0b0010_0000,
+                0b0101_1011,
+                0b0000_1011,
+                0b0111_1000,
+                0b1101_0001,
+                0b0111_0010,
+                0b1101_1100,
+                0b0100_1101,
+                0b0100_0011,
+                0b0100_0000,
+                0b1110_1100,
+                0b0001_0001,
+                0b1110_1100,
             ]
         );
     }
@@ -796,7 +843,7 @@ mod finish_tests {
         let mut bits = Bits::new(Version::Micro(1));
         assert_eq!(bits.push_numeric_data(b"99999"), Ok(()));
         assert_eq!(bits.push_terminator(EcLevel::L), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b10111111, 0b00111110, 0b00110000]);
+        assert_eq!(bits.into_bytes(), vec![0b1011_1111, 0b0011_1110, 0b0011_0000]);
     }
 
     #[test]
@@ -804,7 +851,7 @@ mod finish_tests {
         let mut bits = Bits::new(Version::Micro(1));
         assert_eq!(bits.push_numeric_data(b"9999"), Ok(()));
         assert_eq!(bits.push_terminator(EcLevel::L), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b10011111, 0b00111100, 0b10000000]);
+        assert_eq!(bits.into_bytes(), vec![0b1001_1111, 0b0011_1100, 0b1000_0000]);
     }
 
     #[test]
@@ -812,7 +859,7 @@ mod finish_tests {
         let mut bits = Bits::new(Version::Micro(1));
         assert_eq!(bits.push_numeric_data(b"999"), Ok(()));
         assert_eq!(bits.push_terminator(EcLevel::L), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b01111111, 0b00111000, 0b00000000]);
+        assert_eq!(bits.into_bytes(), vec![0b0111_1111, 0b0011_1000, 0b0000_0000]);
     }
 
     #[test]
@@ -820,7 +867,7 @@ mod finish_tests {
         let mut bits = Bits::new(Version::Micro(1));
         assert_eq!(bits.push_numeric_data(b""), Ok(()));
         assert_eq!(bits.push_terminator(EcLevel::L), Ok(()));
-        assert_eq!(bits.into_bytes(), vec![0b00000000, 0b11101100, 0]);
+        assert_eq!(bits.into_bytes(), vec![0b0000_0000, 0b1110_1100, 0]);
     }
 }
 
@@ -884,8 +931,19 @@ mod encode_tests {
         assert_eq!(
             res,
             Ok(vec![
-                0b00100000, 0b01011011, 0b00001011, 0b01111000, 0b11010001, 0b01110010, 0b11011100, 0b01001101,
-                0b01000011, 0b01000000, 0b11101100, 0b00010001, 0b11101100,
+                0b0010_0000,
+                0b0101_1011,
+                0b0000_1011,
+                0b0111_1000,
+                0b1101_0001,
+                0b0111_0010,
+                0b1101_1100,
+                0b0100_1101,
+                0b0100_0011,
+                0b0100_0000,
+                0b1110_1100,
+                0b0001_0001,
+                0b1110_1100,
             ])
         );
     }
@@ -893,7 +951,7 @@ mod encode_tests {
     #[test]
     fn test_auto_mode_switch() {
         let res = encode(b"123A", Version::Micro(2), EcLevel::L);
-        assert_eq!(res, Ok(vec![0b00011000, 0b11110111, 0b00100101, 0b00000000, 0b11101100]));
+        assert_eq!(res, Ok(vec![0b0001_1000, 0b1111_0111, 0b0010_0101, 0b0000_0000, 0b1110_1100]));
     }
 
     #[test]
@@ -967,7 +1025,7 @@ mod encode_auto_tests {
         assert_eq!(find_min_version(20000, EcLevel::L), Version::Normal(37));
         assert_eq!(find_min_version(640, EcLevel::L), Version::Normal(4));
         assert_eq!(find_min_version(641, EcLevel::L), Version::Normal(5));
-        assert_eq!(find_min_version(999999, EcLevel::H), Version::Normal(40));
+        assert_eq!(find_min_version(999_999, EcLevel::H), Version::Normal(40));
     }
 
     #[test]

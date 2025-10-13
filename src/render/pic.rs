@@ -27,7 +27,7 @@ use crate::render::{Canvas as RenderCanvas, Pixel};
 use crate::types::Color as ModuleColor;
 
 /// A PIC color.
-#[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Color;
 
 impl Pixel for Color {
@@ -39,6 +39,7 @@ impl Pixel for Color {
     }
 }
 
+#[derive(Debug)]
 #[doc(hidden)]
 pub struct Canvas {
     pic: String,

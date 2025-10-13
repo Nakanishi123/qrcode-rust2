@@ -32,6 +32,7 @@ pub trait Pixel: Copy + Sized {
     type Canvas: Canvas<Pixel = Self, Image = Self::Image>;
 
     /// Obtains the default module size. The result must be at least 1×1.
+    #[must_use]
     fn default_unit_size() -> (u32, u32) {
         (8, 8)
     }
@@ -74,6 +75,7 @@ pub trait Canvas: Sized {
 
 /// A QR code renderer. This is a builder type which converts a bool-vector into
 /// an image.
+#[derive(Debug)]
 pub struct Renderer<'a, P: Pixel> {
     content: &'a [Color],
     horizontal_modules_count: u32, // <- we call it `horizontal_modules_count` here to avoid ambiguity of `width`.
@@ -96,6 +98,7 @@ impl<'a, P: Pixel> Renderer<'a, P> {
     ///
     /// Panics if the length of `content` is not exactly
     /// `horizontal_modules_count * vertical_modules_count`.
+    #[must_use]
     pub fn new(
         content: &'a [Color],
         horizontal_modules_count: usize,
@@ -116,19 +119,19 @@ impl<'a, P: Pixel> Renderer<'a, P> {
     }
 
     /// Sets color of a dark module. Default is opaque black.
-    pub fn dark_color(&mut self, color: P) -> &mut Self {
+    pub const fn dark_color(&mut self, color: P) -> &mut Self {
         self.dark_color = color;
         self
     }
 
     /// Sets color of a light module. Default is opaque white.
-    pub fn light_color(&mut self, color: P) -> &mut Self {
+    pub const fn light_color(&mut self, color: P) -> &mut Self {
         self.light_color = color;
         self
     }
 
     /// Whether to include the quiet zone in the generated image.
-    pub fn quiet_zone(&mut self, has_quiet_zone: bool) -> &mut Self {
+    pub const fn quiet_zone(&mut self, has_quiet_zone: bool) -> &mut Self {
         self.has_quiet_zone = has_quiet_zone;
         self
     }

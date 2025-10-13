@@ -31,7 +31,7 @@ use crate::types::{Color, EcLevel, Version};
 //{{{ Modules
 
 /// The color of a module (pixel) in the QR code.
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Module {
     /// The module is empty.
     Empty,
@@ -55,6 +55,7 @@ impl From<Module> for Color {
 
 impl Module {
     /// Checks whether a module is dark.
+    #[must_use]
     pub fn is_dark(self) -> bool {
         Color::from(self) == Color::Dark
     }
@@ -88,7 +89,7 @@ impl Module {
 
 /// `Canvas` is an intermediate helper structure to render error-corrected data
 /// into a QR code.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Canvas {
     /// The width of the canvas (cached as it is needed frequently).
     width: i16,
@@ -109,6 +110,7 @@ pub struct Canvas {
 
 impl Canvas {
     /// Constructs a new canvas big enough for a QR code of the given version.
+    #[must_use]
     pub fn new(version: Version, ec_level: EcLevel) -> Self {
         let (width, height) = (version.width(), version.height());
         let modules = vec![Module::Empty; (width * height).as_usize()];
@@ -163,6 +165,7 @@ impl Canvas {
 
     /// Obtains a module at the given coordinates. For convenience, negative
     /// coordinates will wrap around.
+    #[must_use]
     pub fn get(&self, x: i16, y: i16) -> Module {
         self.modules[self.coords_to_index(x, y)]
     }
@@ -942,7 +945,7 @@ mod draw_version_info_tests {
     #[test]
     fn test_draw_number() {
         let mut c = Canvas::new(Version::Micro(1), EcLevel::L);
-        c.draw_number(0b10101101, 8, Color::Dark, Color::Light, &[(0, 0), (0, -1), (-2, -2), (-2, 0)]);
+        c.draw_number(0b1010_1101, 8, Color::Dark, Color::Light, &[(0, 0), (0, -1), (-2, -2), (-2, 0)]);
         assert_eq!(
             &*c.to_debug_str(),
             "\n\
@@ -1341,6 +1344,7 @@ impl Canvas {
 
 /// Gets whether the module at the given coordinates represents a functional
 /// module.
+#[must_use]
 pub fn is_functional(version: Version, width: i16, x: i16, y: i16) -> bool {
     debug_assert!(width == version.width());
 
@@ -1849,7 +1853,7 @@ mod draw_codewords_test {
 
 /// The mask patterns. Since QR code and Micro QR code do not use the same
 /// pattern number, we name them according to their shape instead of the number.
-#[derive(Debug, Copy, Clone)]
+#[derive(Clone, Copy, Debug)]
 pub enum MaskPattern {
     /// QR code pattern 000: `(x + y) % 2 == 0`.
     Checkerboard = 0b000,
@@ -2385,6 +2389,7 @@ impl Canvas {
 
     /// Convert the modules into a vector of booleans.
     #[deprecated(since = "0.4.0", note = "use `into_colors()` instead")]
+    #[must_use]
     pub fn to_bools(&self) -> Vec<bool> {
         self.modules.iter().map(|m| m.is_dark()).collect()
     }

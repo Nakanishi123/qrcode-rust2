@@ -23,6 +23,7 @@ use crate::types::{EcLevel, QrResult, Version};
 /// (a\[0\] x<sup>m+n</sup> + a\[1\] x<sup>m+n-1</sup> + … + a\[m\] x<sup>n</sup>)
 /// in GF(2<sup>8</sup>), and then computes the polynomial modulus with a
 /// generator polynomial of degree N.
+#[must_use]
 pub fn create_error_correction_code(data: &[u8], ec_code_size: usize) -> Vec<u8> {
     let data_len = data.len();
     let log_den = GENERATOR_POLYNOMIALS[ec_code_size];

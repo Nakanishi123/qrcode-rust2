@@ -36,15 +36,15 @@
 //! # }
 //! ```
 
+#![doc(html_root_url = "https://docs.rs/qrcode/0.14.1/")]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-#![warn(missing_docs)]
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::must_use_candidate, // This is just annoying.
-)]
+// Lint levels of rustc.
+#![deny(missing_docs)]
 
 extern crate alloc;
+#[cfg(feature = "std")]
+extern crate std;
 
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -64,7 +64,7 @@ use crate::cast::As;
 use crate::render::{Pixel, Renderer};
 
 /// The encoded QR code symbol.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QrCode {
     content: Vec<Color>,
     version: Version,
@@ -269,11 +269,13 @@ impl QrCode {
     }
 
     /// Gets the version of this QR code.
+    #[must_use]
     pub const fn version(&self) -> Version {
         self.version
     }
 
     /// Gets the error correction level of this QR code.
+    #[must_use]
     pub const fn error_correction_level(&self) -> EcLevel {
         self.ec_level
     }
@@ -281,6 +283,7 @@ impl QrCode {
     /// Gets the number of modules per side, i.e. the width of this QR code.
     ///
     /// The width here does not contain the quiet zone paddings.
+    #[must_use]
     pub const fn width(&self) -> usize {
         self.width
     }
@@ -288,6 +291,7 @@ impl QrCode {
     /// Gets the number of modules per side, i.e. the height of this QR code.
     ///
     /// The height here does not contain the quiet zone paddings.
+    #[must_use]
     pub const fn height(&self) -> usize {
         self.height
     }
@@ -296,6 +300,7 @@ impl QrCode {
     /// before the data becomes corrupted. Note that errors should not be
     /// introduced to functional modules.
     #[allow(clippy::missing_panics_doc)] // the version and ec_level should have been checked when calling `.with_version()`.
+    #[must_use]
     pub fn max_allowed_errors(&self) -> usize {
         ec::max_allowed_errors(self.version, self.ec_level).expect("invalid version or ec_level")
     }
@@ -306,6 +311,7 @@ impl QrCode {
     /// # Panics
     ///
     /// Panics if `x` or `y` is beyond the size of the QR code.
+    #[must_use]
     pub fn is_functional(&self, x: usize, y: usize) -> bool {
         let x = x.try_into().expect("coordinate is too large for QR code");
         let y = y.try_into().expect("coordinate is too large for QR code");
@@ -314,6 +320,7 @@ impl QrCode {
 
     /// Converts the QR code into a human-readable string. This is mainly for
     /// debugging only.
+    #[must_use]
     pub fn to_debug_str(&self, on_char: char, off_char: char) -> String {
         self.render().quiet_zone(false).dark_color(on_char).light_color(off_char).build()
     }
@@ -321,6 +328,7 @@ impl QrCode {
     /// Converts the QR code to a vector of booleans. Each entry represents the
     /// color of the module, with "true" means dark and "false" means light.
     #[deprecated(since = "0.4.0", note = "use `to_colors()` instead")]
+    #[must_use]
     pub fn to_vec(&self) -> Vec<bool> {
         self.content.iter().map(|c| *c != Color::Light).collect()
     }
@@ -328,16 +336,19 @@ impl QrCode {
     /// Converts the QR code to a vector of booleans. Each entry represents the
     /// color of the module, with "true" means dark and "false" means light.
     #[deprecated(since = "0.4.0", note = "use `into_colors()` instead")]
+    #[must_use]
     pub fn into_vec(self) -> Vec<bool> {
         self.content.into_iter().map(|c| c != Color::Light).collect()
     }
 
     /// Converts the QR code to a vector of colors.
+    #[must_use]
     pub fn to_colors(&self) -> Vec<Color> {
         self.content.clone()
     }
 
     /// Converts the QR code to a vector of colors.
+    #[must_use]
     pub fn into_colors(self) -> Vec<Color> {
         self.content
     }
@@ -367,6 +378,7 @@ impl QrCode {
     ///
     /// Note: the `image` crate itself also provides method to rotate the image,
     /// or overlay a logo on top of the QR code.
+    #[must_use]
     pub fn render<P: Pixel>(&self) -> Renderer<'_, P> {
         let quiet_zone = if self.version.is_normal() { 4 } else { 2 };
         Renderer::new(&self.content, self.width, self.height, quiet_zone)

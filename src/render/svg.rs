@@ -29,7 +29,7 @@ use crate::render::{Canvas as RenderCanvas, Pixel};
 use crate::types::Color as ModuleColor;
 
 /// An SVG color.
-#[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Color<'a>(pub &'a str);
 
 impl<'a> Pixel for Color<'a> {
@@ -41,6 +41,7 @@ impl<'a> Pixel for Color<'a> {
     }
 }
 
+#[derive(Debug)]
 #[doc(hidden)]
 pub struct Canvas<'a> {
     svg: String,

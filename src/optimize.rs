@@ -14,7 +14,7 @@ use core::slice::Iter;
 //{{{ Segment
 
 /// A segment of data committed to an encoding mode.
-#[derive(PartialEq, Eq, Debug, Copy, Clone)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Segment {
     /// The encoding mode of the segment of data.
     pub mode: Mode,
@@ -29,6 +29,7 @@ pub struct Segment {
 impl Segment {
     /// Compute the number of bits (including the size of the mode indicator and
     /// length bits) when this segment is encoded.
+    #[must_use]
     pub fn encoded_len(&self, version: Version) -> usize {
         let byte_size = self.end - self.begin;
         let chars_count = if self.mode == Mode::Kanji { byte_size / 2 } else { byte_size };
@@ -54,6 +55,7 @@ impl Segment {
 /// ```
 ///
 /// But the type is too hard to write, thus the new type.
+#[derive(Debug)]
 struct EcsIter<I> {
     base: I,
     index: usize,
@@ -83,6 +85,7 @@ impl<'a, I: Iterator<Item = &'a u8>> Iterator for EcsIter<I> {
 }
 
 /// QR code data parser to classify the input into distinct segments.
+#[derive(Debug)]
 pub struct Parser<'a> {
     ecs_iter: EcsIter<Iter<'a, u8>>,
     state: State,
@@ -108,6 +111,7 @@ impl Parser<'_> {
     ///     ]
     /// );
     /// ```
+    #[must_use]
     pub fn new(data: &[u8]) -> Parser<'_> {
         Parser {
             ecs_iter: EcsIter { base: data.iter(), index: 0, ended: false },
@@ -258,6 +262,7 @@ mod parse_tests {
 //{{{ Optimizer
 
 /// QR code data optimizer.
+#[derive(Debug)]
 pub struct Optimizer<I> {
     parser: I,
     last_segment: Segment,
@@ -294,6 +299,7 @@ impl<I: Iterator<Item = Segment>> Optimizer<I> {
 
 impl Parser<'_> {
     /// Creates a new `Optimizer` based on this parser.
+    #[must_use]
     pub fn optimize(self, version: Version) -> Optimizer<Self> {
         Optimizer::new(self, version)
     }
@@ -339,6 +345,7 @@ impl<I: Iterator<Item = Segment>> Iterator for Optimizer<I> {
 }
 
 /// Computes the total encoded length of all segments.
+#[must_use]
 pub fn total_encoded_len(segments: &[Segment], version: Version) -> usize {
     segments.iter().map(|seg| seg.encoded_len(version)).sum()
 }
@@ -473,7 +480,7 @@ mod optimize_tests {
 /// All values of `u8` can be split into 9 different character sets when
 /// determining which encoding to use. This enum represents these groupings for
 /// parsing purpose.
-#[derive(Copy, Clone)]
+#[derive(Clone, Copy)]
 enum ExclCharSet {
     /// The end of string.
     End = 0,
@@ -533,7 +540,7 @@ impl ExclCharSet {
 }
 
 /// The current parsing state.
-#[derive(Copy, Clone)]
+#[derive(Clone, Copy, Debug)]
 enum State {
     /// Just initialized.
     Init = 0,
@@ -560,7 +567,7 @@ enum State {
 }
 
 /// What should the parser do after a state transition.
-#[derive(Copy, Clone)]
+#[derive(Clone, Copy)]
 enum Action {
     /// The parser should do nothing.
     Idle,

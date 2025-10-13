@@ -15,7 +15,7 @@ use qrcode::{EcLevel, QrCode, Version, render::svg::Color};
 #[test]
 fn test_annex_i_qr_as_svg() {
     let code = QrCode::new(b"01234567").unwrap();
-    let image = code.render::<Color>().build();
+    let image = code.render::<Color<'_>>().build();
     let expected = include_str!("data/test_annex_i_qr_as_svg.svg");
     assert_eq!(&image, expected);
 }
@@ -32,7 +32,7 @@ fn test_annex_i_micro_qr_as_svg() {
 #[test]
 fn test_annex_i_rmqr_as_svg() {
     let code = QrCode::with_version(b"01234567", Version::RectMicro(15, 43), EcLevel::M).unwrap();
-    let image = code.render::<Color>().build();
+    let image = code.render::<Color<'_>>().build();
     let expected = include_str!("data/test_annex_i_rmqr_as_svg.svg");
     assert_eq!(&image, expected);
 }
