@@ -55,8 +55,8 @@ impl Element for &str {
     }
 }
 
+/// A canvas for string rendering.
 #[derive(Debug)]
-#[doc(hidden)]
 pub struct Canvas<P: Element> {
     buffer: Vec<P>,
     width: usize,

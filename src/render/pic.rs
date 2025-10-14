@@ -40,8 +40,8 @@ impl Pixel for Color {
     }
 }
 
+/// A canvas for PIC rendering.
 #[derive(Debug)]
-#[doc(hidden)]
 pub struct Canvas {
     pic: String,
 }

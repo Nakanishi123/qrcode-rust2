@@ -41,8 +41,8 @@ impl<'a> Pixel for Color<'a> {
     }
 }
 
+/// A canvas for SVG rendering.
 #[derive(Debug)]
-#[doc(hidden)]
 pub struct Canvas<'a> {
     svg: String,
     marker: PhantomData<Color<'a>>,

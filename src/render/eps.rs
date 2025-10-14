@@ -39,8 +39,8 @@ impl Pixel for Color {
     }
 }
 
+/// A canvas for EPS rendering.
 #[derive(Debug)]
-#[doc(hidden)]
 pub struct Canvas {
     eps: String,
     height: u32,
