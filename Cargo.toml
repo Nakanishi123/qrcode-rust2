@@ -22,9 +22,6 @@ keywords = ["qrcode", "rmqr"]
 categories = ["encoding", "multimedia::images", "no-std"]
 include = ["/LICENSES", "/README.md", "/src"]
 
-[package.metadata.docs.rs]
-all-features = true
-
 [[example]]
 name = "encode_eps"
 required-features = ["eps"]
