@@ -37,3 +37,4 @@ project adheres to https://semver.org/[Semantic Versioning].
 
 * Remove binary target
 * Remove `bench` feature
+* Remove deprecated methods ({pull-request-url}/3[#3])

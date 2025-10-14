@@ -18,7 +18,7 @@
 //! c.draw_all_functional_patterns();
 //! c.draw_data(b"data_here", b"ec_code_here");
 //! c.apply_mask(MaskPattern::Checkerboard);
-//! let bools = c.to_bools();
+//! let colors = c.into_colors();
 //! ```
 
 use alloc::{boxed::Box, vec, vec::Vec};
@@ -2562,13 +2562,6 @@ impl Canvas {
         })
         .min_by_key(Self::compute_total_penalty_scores)
         .expect("at least one pattern")
-    }
-
-    /// Convert the modules into a vector of booleans.
-    #[deprecated(since = "0.4.0", note = "use `into_colors()` instead")]
-    #[must_use]
-    pub fn to_bools(&self) -> Vec<bool> {
-        self.modules.iter().map(|m| m.is_dark()).collect()
     }
 
     /// Convert the modules into a vector of colors.

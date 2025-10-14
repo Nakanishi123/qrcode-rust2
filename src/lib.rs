@@ -340,25 +340,6 @@ impl QrCode {
             .build()
     }
 
-    /// Converts the QR code to a vector of booleans. Each entry represents the
-    /// color of the module, with "true" means dark and "false" means light.
-    #[deprecated(since = "0.4.0", note = "use `to_colors()` instead")]
-    #[must_use]
-    pub fn to_vec(&self) -> Vec<bool> {
-        self.content.iter().map(|c| *c != Color::Light).collect()
-    }
-
-    /// Converts the QR code to a vector of booleans. Each entry represents the
-    /// color of the module, with "true" means dark and "false" means light.
-    #[deprecated(since = "0.4.0", note = "use `into_colors()` instead")]
-    #[must_use]
-    pub fn into_vec(self) -> Vec<bool> {
-        self.content
-            .into_iter()
-            .map(|c| c != Color::Light)
-            .collect()
-    }
-
     /// Converts the QR code to a vector of colors.
     #[must_use]
     pub fn to_colors(&self) -> Vec<Color> {
