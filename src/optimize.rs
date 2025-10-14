@@ -12,8 +12,7 @@ use core::slice::Iter;
 
 use crate::types::{Mode, Version};
 
-//------------------------------------------------------------------------------
-//{{{ Segment
+// Segment
 
 /// A segment of data committed to an encoding mode.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -48,9 +47,7 @@ impl Segment {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Parser
+// Parser
 
 /// This iterator is basically equivalent to
 ///
@@ -400,9 +397,7 @@ mod parse_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Optimizer
+// Optimizer
 
 /// QR code data optimizer.
 #[derive(Debug)]
@@ -778,9 +773,7 @@ mod optimize_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Internal types and data for parsing
+// Internal types and data for parsing
 
 /// All values of `u8` can be split into 9 different character sets when
 /// determining which encoding to use. This enum represents these groupings for
@@ -975,5 +968,3 @@ static STATE_TRANSITION: [(State, Action); 70] = [
     (State::Byte, Action::Kanji),     // KanjiLo2
     (State::Byte, Action::Kanji),     // Byte
 ];
-
-//}}}

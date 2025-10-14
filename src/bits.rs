@@ -17,8 +17,7 @@ use crate::{
     types::{EcLevel, Mode, QrError, QrResult, Version},
 };
 
-//------------------------------------------------------------------------------
-//{{{ Bits
+// Bits
 
 /// The `Bits` structure stores the encoded data for a QR code.
 #[derive(Debug)]
@@ -167,9 +166,7 @@ fn test_push_number() {
     );
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Mode indicator
+// Mode indicator
 
 /// An "extended" mode indicator, includes all indicators supported by QR code
 /// beyond those bearing data.
@@ -230,9 +227,7 @@ impl Bits {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ ECI
+// ECI
 
 impl Bits {
     /// Push an ECI (Extended Channel Interpretation) designator to the bits.
@@ -349,9 +344,7 @@ mod eci_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Mode::Numeric mode
+// `Mode::Numeric` mode
 
 impl Bits {
     fn push_header(&mut self, mode: Mode, raw_data_len: usize) -> QrResult<()> {
@@ -458,9 +451,7 @@ mod numeric_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Mode::Alphanumeric mode
+// `Mode::Alphanumeric` mode
 
 /// In QR code `Mode::Alphanumeric` mode, a pair of alphanumeric characters will
 /// be encoded as a base-45 integer. `alphanumeric_digit` converts each
@@ -553,9 +544,7 @@ mod alphanumeric_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Mode::Byte mode
+// `Mode::Byte` mode
 
 impl Bits {
     /// Encodes 8-bit byte data to the bits.
@@ -624,9 +613,7 @@ mod byte_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Mode::Kanji mode
+// `Mode::Kanji` mode
 
 impl Bits {
     /// Encodes Shift JIS double-byte data to the bits.
@@ -700,9 +687,7 @@ mod kanji_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ FNC1 mode
+// FNC1 mode
 
 impl Bits {
     /// Encodes an indicator that the following data are formatted according to
@@ -763,9 +748,7 @@ impl Bits {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Finish
+// Finish
 
 // This table is copied from ISO/IEC 18004:2006 §6.4.10, Table 7, and ISO/IEC
 // 23941:2022 Table 6.
@@ -984,9 +967,7 @@ mod finish_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Front end.
+// Front end
 
 impl Bits {
     /// Push a segmented data to the bits, and then terminate it.
@@ -1085,9 +1066,7 @@ mod encode_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Auto version minimization
+// Auto version minimization
 
 /// Automatically determines the minimum version to store the data, and encode
 /// the result.
@@ -1183,9 +1162,7 @@ mod encode_auto_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Auto Micro QR code's version minimization
+// Auto Micro QR code's version minimization
 
 /// Automatically determines the minimum version to store the data, and encode
 /// the result.
@@ -1251,9 +1228,7 @@ mod encode_auto_micro_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Auto rMQR code's version minimization
+// Auto rMQR code's version minimization
 
 /// Automatically determines the minimum version to store the data, and encode
 /// the result.
@@ -1325,6 +1300,3 @@ mod encode_auto_rect_micro_tests {
         assert_eq!(bits.version(), Version::RectMicro(13, 99));
     }
 }
-
-//}}}
-//------------------------------------------------------------------------------

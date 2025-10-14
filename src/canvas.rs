@@ -30,8 +30,7 @@ use crate::{
     types::{Color, EcLevel, Version},
 };
 
-//------------------------------------------------------------------------------
-//{{{ Modules
+// Modules
 
 /// The color of a module (pixel) in the QR code.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -100,9 +99,7 @@ impl Module {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Canvas
+// Canvas
 
 /// `Canvas` is an intermediate helper structure to render error-corrected data
 /// into a QR code.
@@ -274,9 +271,7 @@ mod basic_canvas_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Finder patterns
+// Finder patterns
 
 impl Canvas {
     /// Draws a single finder pattern with the center at (x, y).
@@ -410,9 +405,7 @@ mod finder_pattern_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Alignment patterns
+// Alignment patterns
 
 impl Canvas {
     /// Draws a alignment pattern with the center at (x, y).
@@ -681,9 +674,7 @@ static ALIGNMENT_PATTERN_POSITIONS: [&[i16]; 40] = [
     &[27, 55, 83, 111], // 139
 ];
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Corner finder patterns for rMQR code
+// Corner finder patterns for rMQR code
 
 impl Canvas {
     /// Draws the rMQR corner finder pattern.
@@ -709,9 +700,7 @@ impl Canvas {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Timing patterns
+// Timing patterns
 
 impl Canvas {
     /// Draws a line from (x1, y1) to (x2, y2), inclusively.
@@ -935,9 +924,7 @@ mod timing_pattern_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Format info & Version info
+// Format info & Version info
 
 impl Canvas {
     /// Draws a big-endian integer onto the canvas with the given coordinates.
@@ -1442,9 +1429,7 @@ static RMQR_VERSION_INFOS_R: [[u32; 2]; 32] = [
     [0x3f82b, 0x1f1fe], // R17x139
 ];
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ All functional patterns before data placement
+// All functional patterns before data placement
 
 impl Canvas {
     /// Draw all functional patterns, before data placement.
@@ -1618,9 +1603,7 @@ mod all_functional_patterns_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Data placement iterator
+// Data placement iterator
 
 struct DataModuleIter {
     x: i16,
@@ -1860,9 +1843,7 @@ mod data_iter_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Data placement
+// Data placement
 
 impl Canvas {
     fn draw_codewords<I>(&mut self, codewords: &[u8], is_half_codeword_at_end: bool, coords: &mut I)
@@ -1997,9 +1978,7 @@ mod draw_codewords_test {
         );
     }
 }
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Masking
+// Masking
 
 /// The mask patterns. Since QR code and Micro QR code do not use the same
 /// pattern number, we name them according to their shape instead of the number.
@@ -2235,9 +2214,7 @@ static FORMAT_INFOS_MICRO_QR: [u16; 32] = [
     0x2508, 0x203f, 0x2f66, 0x2a51, 0x34e3, 0x31d4, 0x3e8d, 0x3bba,
 ];
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Penalty score
+// Penalty score
 
 impl Canvas {
     /// Compute the penalty score for having too many adjacent modules with the
@@ -2519,9 +2496,7 @@ mod penalty_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Select mask with lowest penalty score
+// Select mask with lowest penalty score
 
 static ALL_PATTERNS_QR: [MaskPattern; 8] = [
     MaskPattern::Checkerboard,
@@ -2570,6 +2545,3 @@ impl Canvas {
         self.modules.into_iter().map(Color::from).collect()
     }
 }
-
-//}}}
-//------------------------------------------------------------------------------

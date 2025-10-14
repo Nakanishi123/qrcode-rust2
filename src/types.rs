@@ -18,8 +18,7 @@ use core::{
 
 use crate::cast::As;
 
-//------------------------------------------------------------------------------
-//{{{ QrResult
+// `QrResult`
 
 /// `QrError` encodes the error encountered when generating a QR code.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -61,9 +60,7 @@ impl ::std::error::Error for QrError {}
 /// `QrResult` is a convenient alias for a QR code generation result.
 pub type QrResult<T> = Result<T, QrError>;
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Color
+// Color
 
 /// The color of a module.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -103,9 +100,7 @@ impl Not for Color {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Error correction level
+// Error correction level
 
 /// The error correction level. It allows the original information be recovered
 /// even if parts of the code is damaged.
@@ -124,9 +119,7 @@ pub enum EcLevel {
     H = 3,
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Version
+// Version
 
 /// In QR code terminology, `Version` means the size of the generated image.
 /// Larger version means the size of code is larger, and therefore can carry
@@ -346,9 +339,7 @@ mod version_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Mode indicator
+// Mode indicator
 
 /// The mode indicator, which specifies the character set of the encoded data.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -495,8 +486,6 @@ mod mode_tests {
         assert_eq!(Kanji.max(Kanji), Kanji);
     }
 }
-
-//}}}
 
 /// The number of bits needed to encode the length of the data.
 ///

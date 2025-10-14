@@ -19,8 +19,7 @@ pub mod string;
 pub mod svg;
 pub mod unicode;
 
-//------------------------------------------------------------------------------
-//{{{ Pixel trait
+// Pixel trait
 
 /// Abstraction of an image pixel.
 pub trait Pixel: Copy + Sized {
@@ -69,9 +68,7 @@ pub trait Canvas: Sized {
     fn into_image(self) -> Self::Image;
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Renderer
+// Renderer
 
 /// A QR code renderer. This is a builder type which converts a bool-vector into
 /// an image.
@@ -213,5 +210,3 @@ impl<'a, P: Pixel> Renderer<'a, P> {
         canvas.into_image()
     }
 }
-
-//}}}

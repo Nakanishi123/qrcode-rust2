@@ -12,8 +12,7 @@ use core::ops::Deref;
 
 use crate::types::{EcLevel, QrResult, Version};
 
-//------------------------------------------------------------------------------
-//{{{ Error correction primitive
+// Error correction primitive
 
 /// Creates the error correction code in N bytes.
 ///
@@ -74,9 +73,7 @@ mod ec_tests {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Interleave support
+// Interleave support
 
 /// This method interleaves a vector of slices into a single vector.
 ///
@@ -104,9 +101,7 @@ fn test_interleave() {
     assert_eq!(&*res, b"15ag26bh37ci48djekfl");
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ QR code error correction
+// QR code error correction
 
 /// Constructs data and error correction codewords ready to be put in the QR
 /// code matrix.
@@ -187,9 +182,7 @@ mod construct_codewords_test {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Number of allowed errors
+// Number of allowed errors
 
 /// Computes the maximum allowed number of erratic modules can be introduced to
 /// the QR code, before the data becomes truly corrupted.
@@ -321,9 +314,7 @@ mod max_allowed_errors_test {
     }
 }
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Precomputed tables for GF(256).
+// Precomputed tables for GF(256)
 
 /// `EXP_TABLE` encodes the value of 2<sup>n</sup> in the Galois Field GF(256).
 static EXP_TABLE: &[u8] = b"\
@@ -447,9 +438,7 @@ static GENERATOR_POLYNOMIALS: [&[u8]; 70] = [
     b"\x69\x49\x44\x01\x1d\xa8\x75\x0e\x58\xd0\x37\x2e\x2a\xd9\x06\x54\xb3\x61\x06\xf0\xc0\xe7\x9e\x40\x76\xa0\xcb\x39\x3d\x6c\xc7\x7c\x41\xbb\xdd\xa7\x27\xb6\x9f\xb4\xf4\xcb\xe4\xfe\x0d\xaf\x3d\x5a\xce\x28\xc7\x5e\x43\x39\x51\xe5\x2e\x7b\x59\x25\x1f\xca\x42\xfa\x23\xaa\xf3\x58\x33",
 ];
 
-//}}}
-//------------------------------------------------------------------------------
-//{{{ Tables for error correction sizes
+// Tables for error correction sizes
 
 /// `EC_BYTES_PER_BLOCK` provides the number of codewords (bytes) used for error
 /// correction per block in each version.
@@ -799,5 +788,3 @@ static DATA_BYTES_PER_BLOCK: [[(usize, usize, usize, usize); 4]; 76] = [
     [(0, 0, 0, 0), (33, 2, 34, 1), (0, 0, 0, 0), (14, 4, 0, 0)], // R17x99
     [(0, 0, 0, 0), (38, 4, 0, 0), (0, 0, 0, 0), (12, 2, 13, 4)], // R17x139
 ];
-
-//}}}
