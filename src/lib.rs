@@ -58,6 +58,7 @@ pub mod types;
 
 pub use crate::types::{Color, EcLevel, QrResult, Version};
 use crate::{
+    bits::RectMicroStrategy,
     cast::As,
     render::{Pixel, Renderer},
 };
@@ -180,7 +181,8 @@ impl QrCode {
     /// Constructs a new rMQR code which automatically encodes the given data at
     /// a specific error correction level.
     ///
-    /// This method automatically chooses the smallest rMQR code.
+    /// This method automatically chooses the smallest rMQR code based on
+    /// [`RectMicroStrategy::Area`].
     ///
     /// ```
     /// use qrcode2::{EcLevel, QrCode};
@@ -196,7 +198,7 @@ impl QrCode {
         data: D,
         ec_level: EcLevel,
     ) -> QrResult<Self> {
-        let bits = bits::encode_auto_rect_micro(data.as_ref(), ec_level)?;
+        let bits = bits::encode_auto_rect_micro(data.as_ref(), ec_level, RectMicroStrategy::Area)?;
         Self::with_bits(bits, ec_level)
     }
 

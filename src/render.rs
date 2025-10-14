@@ -75,10 +75,10 @@ pub trait Canvas: Sized {
 #[derive(Debug)]
 pub struct Renderer<'a, P: Pixel> {
     content: &'a [Color],
-    horizontal_modules_count: u32, /* <- we call it `horizontal_modules_count` here to avoid
-                                    * ambiguity of `width`. */
-    vertical_modules_count: u32, /* <- we call it `vertical_modules_count` here to avoid
-                                  * ambiguity of `height`. */
+    // we call it `horizontal_modules_count` here to avoid ambiguity of `width`.
+    horizontal_modules_count: u32,
+    // we call it `vertical_modules_count` here to avoid ambiguity of `height`.
+    vertical_modules_count: u32,
     quiet_zone: u32,
     module_size: (u32, u32),
 

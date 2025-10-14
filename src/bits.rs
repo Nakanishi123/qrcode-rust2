@@ -1230,6 +1230,19 @@ mod encode_auto_micro_tests {
 
 // Auto rMQR code's version minimization
 
+/// Auto rMQR code's version minimization strategy.
+#[derive(Clone, Copy, Debug)]
+pub enum RectMicroStrategy {
+    /// Minimize the width.
+    Width,
+
+    /// Minimize the height.
+    Height,
+
+    /// Minimize the area.
+    Area,
+}
+
 /// Automatically determines the minimum version to store the data, and encode
 /// the result.
 ///
@@ -1239,7 +1252,11 @@ mod encode_auto_micro_tests {
 ///
 /// Returns `Err(QrError::DataTooLong)` if the data is too long to fit even the
 /// highest rMQR code version.
-pub fn encode_auto_rect_micro(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> {
+pub fn encode_auto_rect_micro(
+    data: &[u8],
+    ec_level: EcLevel,
+    strategy: RectMicroStrategy,
+) -> QrResult<Bits> {
     let segments = Parser::new(data).collect::<Vec<Segment>>();
     let mut possible_versions = Vec::new();
     for width in Version::RMQR_ALL_WIDTH {
@@ -1259,9 +1276,14 @@ pub fn encode_auto_rect_micro(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> 
         }
     }
 
-    let min_version = possible_versions
-        .iter()
-        .min_by_key(|v| v.width() * v.height());
+    let min_version = match strategy {
+        // `possible_versions` is already sorted by width
+        RectMicroStrategy::Width => possible_versions.first(),
+        RectMicroStrategy::Height => possible_versions.iter().min_by_key(|v| v.height()),
+        RectMicroStrategy::Area => possible_versions
+            .iter()
+            .min_by_key(|v| v.width() * v.height()),
+    };
 
     if let Some(version) = min_version {
         let mut bits = Bits::new(*version);
@@ -1277,26 +1299,82 @@ pub fn encode_auto_rect_micro(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> 
 #[cfg(test)]
 mod encode_auto_rect_micro_tests {
     use crate::{
-        bits::encode_auto_rect_micro,
+        bits::{RectMicroStrategy, encode_auto_rect_micro},
         types::{EcLevel, Version},
     };
 
     #[test]
-    fn test_alpha_m() {
-        let bits = encode_auto_rect_micro(b"HELLO WORLD", EcLevel::M).unwrap();
+    fn test_alpha_m_width() {
+        let bits =
+            encode_auto_rect_micro(b"HELLO WORLD", EcLevel::M, RectMicroStrategy::Width).unwrap();
         assert_eq!(bits.version(), Version::RectMicro(13, 27));
     }
 
     #[test]
-    fn test_alpha_h() {
-        let bits = encode_auto_rect_micro(b"HELLO WORLD", EcLevel::H).unwrap();
+    fn test_alpha_m_height() {
+        let bits =
+            encode_auto_rect_micro(b"HELLO WORLD", EcLevel::M, RectMicroStrategy::Height).unwrap();
+        assert_eq!(bits.version(), Version::RectMicro(7, 59));
+    }
+
+    #[test]
+    fn test_alpha_m_area() {
+        let bits =
+            encode_auto_rect_micro(b"HELLO WORLD", EcLevel::M, RectMicroStrategy::Area).unwrap();
+        assert_eq!(bits.version(), Version::RectMicro(13, 27));
+    }
+
+    #[test]
+    fn test_alpha_h_width() {
+        let bits =
+            encode_auto_rect_micro(b"HELLO WORLD", EcLevel::H, RectMicroStrategy::Width).unwrap();
         assert_eq!(bits.version(), Version::RectMicro(11, 43));
     }
 
     #[test]
-    fn test_mixed() {
+    fn test_alpha_h_height() {
         let bits =
-            encode_auto_rect_micro(b"This is a mixed data test. 1234567890", EcLevel::H).unwrap();
+            encode_auto_rect_micro(b"HELLO WORLD", EcLevel::H, RectMicroStrategy::Height).unwrap();
+        assert_eq!(bits.version(), Version::RectMicro(7, 77));
+    }
+
+    #[test]
+    fn test_alpha_h_area() {
+        let bits =
+            encode_auto_rect_micro(b"HELLO WORLD", EcLevel::H, RectMicroStrategy::Area).unwrap();
+        assert_eq!(bits.version(), Version::RectMicro(11, 43));
+    }
+
+    #[test]
+    fn test_mixed_width() {
+        let bits = encode_auto_rect_micro(
+            b"This is a mixed data test. 1234567890",
+            EcLevel::H,
+            RectMicroStrategy::Width,
+        )
+        .unwrap();
+        assert_eq!(bits.version(), Version::RectMicro(17, 77));
+    }
+
+    #[test]
+    fn test_mixed_height() {
+        let bits = encode_auto_rect_micro(
+            b"This is a mixed data test. 1234567890",
+            EcLevel::H,
+            RectMicroStrategy::Height,
+        )
+        .unwrap();
+        assert_eq!(bits.version(), Version::RectMicro(11, 139));
+    }
+
+    #[test]
+    fn test_mixed_area() {
+        let bits = encode_auto_rect_micro(
+            b"This is a mixed data test. 1234567890",
+            EcLevel::H,
+            RectMicroStrategy::Area,
+        )
+        .unwrap();
         assert_eq!(bits.version(), Version::RectMicro(13, 99));
     }
 }
