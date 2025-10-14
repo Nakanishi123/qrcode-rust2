@@ -1,10 +1,5 @@
-// SPDX-FileCopyrightText: 2014 kennytm
-// SPDX-FileCopyrightText: 2016 Steven Allen
-// SPDX-FileCopyrightText: 2019 Ivan Tham
-// SPDX-FileCopyrightText: 2019 Jasper Bryant-Greene
-// SPDX-FileCopyrightText: 2024 Alexis Hildebrandt
-// SPDX-FileCopyrightText: 2024 Michael Spiegel
-// SPDX-FileCopyrightText: 2024 Shun Sakai
+// SPDX-FileCopyrightText: 2017 kennytm
+// SPDX-FileCopyrightText: 2025 Shun Sakai
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 

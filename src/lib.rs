@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: 2016 Steven Allen
 // SPDX-FileCopyrightText: 2019 Ivan Tham
 // SPDX-FileCopyrightText: 2019 Jasper Bryant-Greene
-// SPDX-FileCopyrightText: 2024 Alexis Hildebrandt
 // SPDX-FileCopyrightText: 2024 Michael Spiegel
 // SPDX-FileCopyrightText: 2024 Shun Sakai
 //
