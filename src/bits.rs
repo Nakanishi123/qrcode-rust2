@@ -1167,7 +1167,7 @@ mod encode_auto_tests {
 /// Automatically determines the minimum version to store the data, and encode
 /// the result.
 ///
-/// This method will not consider any QR code versions.
+/// This method will not consider any QR code or rMQR code versions.
 ///
 /// # Errors
 ///
