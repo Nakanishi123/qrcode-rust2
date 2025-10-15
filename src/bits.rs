@@ -253,8 +253,6 @@ impl Bits {
     /// `.push_byte_data()` or similar methods to insert the actual data, e.g.
     ///
     /// ```
-    /// #![allow(unused_must_use)]
-    ///
     /// use qrcode2::{bits::Bits, types::Version};
     ///
     /// let mut bits = Bits::new(Version::Normal(1));
@@ -713,8 +711,6 @@ impl Bits {
     /// the UCC/EAN Application Identifiers standard.
     ///
     /// ```
-    /// #![allow(unused_must_use)]
-    ///
     /// use qrcode2::{bits::Bits, types::Version};
     ///
     /// let mut bits = Bits::new(Version::Normal(1));
@@ -739,8 +735,6 @@ impl Bits {
     /// with AIM International.
     ///
     /// ```
-    /// #![allow(unused_must_use)]
-    ///
     /// use qrcode2::{bits::Bits, types::Version};
     ///
     /// let mut bits = Bits::new(Version::Normal(1));

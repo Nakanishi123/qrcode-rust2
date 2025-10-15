@@ -248,8 +248,6 @@ impl QrCode {
     /// See the `Bits` structure for detail.
     ///
     /// ```
-    /// #![allow(unused_must_use)]
-    ///
     /// use qrcode2::{EcLevel, QrCode, Version, bits::Bits};
     ///
     /// let mut bits = Bits::new(Version::Normal(1));

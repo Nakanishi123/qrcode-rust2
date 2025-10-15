@@ -3149,11 +3149,9 @@ static ALL_PATTERNS_MICRO_QR: [MaskPattern; 4] = [
 static ALL_PATTERNS_RMQR: [MaskPattern; 1] = [MaskPattern::LargeCheckerboard];
 
 impl Canvas {
+    #[allow(clippy::missing_panics_doc)]
     /// Construct a new canvas and apply the best masking that gives the lowest
     /// penalty score.
-    #[allow(clippy::missing_panics_doc)]
-    // the expect() only panics when the input iterators (ALL_PATTERNS_QR, ALL_PATTERNS_MICRO_QR)
-    // are empty
     #[must_use]
     pub fn apply_best_mask(&self) -> Self {
         match self.version {
