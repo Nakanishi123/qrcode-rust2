@@ -363,8 +363,6 @@ static LOG_TABLE: &[u8] = b"\
 /// is the Reed-Solomon error correction code.
 ///
 /// A partial list can be found from ISO/IEC 18004:2006 Annex A.
-#[rustfmt::skip]
-// ^ this attribute is currently useless, see rust-lang-nursery/rustfmt#1080 and 1298
 static GENERATOR_POLYNOMIALS: [&[u8]; 70] = [
     b"",
     b"\x00",
