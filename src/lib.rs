@@ -309,10 +309,10 @@ impl QrCode {
         self.height
     }
 
+    #[allow(clippy::missing_panics_doc)]
     /// Gets the maximum number of allowed erratic modules can be introduced
     /// before the data becomes corrupted. Note that errors should not be
     /// introduced to functional modules.
-    #[allow(clippy::missing_panics_doc)] // the version and ec_level should have been checked when calling `.with_version()`.
     #[must_use]
     pub fn max_allowed_errors(&self) -> usize {
         ec::max_allowed_errors(self.version, self.ec_level).expect("invalid version or ec_level")
@@ -370,9 +370,9 @@ impl QrCode {
     ///     .unwrap()
     ///     .render()
     ///     .dark_color(Rgb([0, 0, 128]))
-    ///     .light_color(Rgb([224, 224, 224])) // adjust colors
-    ///     .quiet_zone(false) // disable quiet zone (white border)
-    ///     .min_dimensions(300, 300) // sets minimum image size
+    ///     .light_color(Rgb([224, 224, 224]))
+    ///     .quiet_zone(false)
+    ///     .min_dimensions(300, 300)
     ///     .build();
     /// # }
     /// ```

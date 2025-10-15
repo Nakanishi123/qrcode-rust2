@@ -140,28 +140,44 @@ fn test_push_number() {
     use alloc::vec;
     let mut bits = Bits::new(Version::Normal(1));
 
-    bits.push_number(3, 0b010); // 0:0 .. 0:3
-    bits.push_number(3, 0b110); // 0:3 .. 0:6
-    bits.push_number(3, 0b101); // 0:6 .. 1:1
-    bits.push_number(7, 0b001_1010); // 1:1 .. 2:0
-    bits.push_number(4, 0b1100); // 2:0 .. 2:4
-    bits.push_number(12, 0b1011_0110_1101); // 2:4 .. 4:0
-    bits.push_number(10, 0b01_1001_0001); // 4:0 .. 5:2
-    bits.push_number(15, 0b111_0010_1110_0011); // 5:2 .. 7:1
+    // 0:0 .. 0:3
+    bits.push_number(3, 0b010);
+    // 0:3 .. 0:6
+    bits.push_number(3, 0b110);
+    // 0:6 .. 1:1
+    bits.push_number(3, 0b101);
+    // 1:1 .. 2:0
+    bits.push_number(7, 0b001_1010);
+    // 2:0 .. 2:4
+    bits.push_number(4, 0b1100);
+    // 2:4 .. 4:0
+    bits.push_number(12, 0b1011_0110_1101);
+    // 4:0 .. 5:2
+    bits.push_number(10, 0b01_1001_0001);
+    // 5:2 .. 7:1
+    bits.push_number(15, 0b111_0010_1110_0011);
 
     let bytes = bits.into_bytes();
 
     assert_eq!(
         bytes,
         vec![
-            0b0101_1010, // 90
-            0b1001_1010, // 154
-            0b1100_1011, // 203
-            0b0110_1101, // 109
-            0b0110_0100, // 100
-            0b0111_1001, // 121
-            0b0111_0001, // 113
-            0b1000_0000, // 128
+            // 90
+            0b0101_1010,
+            // 154
+            0b1001_1010,
+            // 203
+            0b1100_1011,
+            // 109
+            0b0110_1101,
+            // 100
+            0b0110_0100,
+            // 121
+            0b0111_1001,
+            // 113
+            0b0111_0001,
+            // 128
+            0b1000_0000,
         ]
     );
 }
@@ -242,8 +258,10 @@ impl Bits {
     /// use qrcode2::{bits::Bits, types::Version};
     ///
     /// let mut bits = Bits::new(Version::Normal(1));
-    /// bits.push_eci_designator(9); // 9 = ISO-8859-7 (Greek).
-    /// bits.push_byte_data(b"\xa1\xa2\xa3\xa4\xa5"); // ΑΒΓΔΕ
+    /// // 9 = ISO-8859-7 (Greek).
+    /// bits.push_eci_designator(9);
+    /// // ΑΒΓΔΕ
+    /// bits.push_byte_data(b"\xa1\xa2\xa3\xa4\xa5");
     /// ```
     ///
     /// The full list of ECI designator values can be found from
@@ -268,7 +286,8 @@ impl Bits {
     /// If the designator is outside of the expected range, this method will
     /// return `Err(QrError::InvalidECIDesignator)`.
     pub fn push_eci_designator(&mut self, eci_designator: u32) -> QrResult<()> {
-        self.reserve(12); // assume the common case that eci_designator <= 127.
+        // assume the common case that eci_designator <= 127.
+        self.reserve(12);
         self.push_mode_indicator(ExtendedMode::Eci)?;
         match eci_designator {
             0..=127 => {
@@ -1068,6 +1087,7 @@ mod encode_tests {
 
 // Auto version minimization
 
+#[allow(clippy::missing_panics_doc)]
 /// Automatically determines the minimum version to store the data, and encode
 /// the result.
 ///
@@ -1077,7 +1097,6 @@ mod encode_tests {
 ///
 /// Returns `Err(QrError::DataTooLong)` if the data is too long to fit even the
 /// highest QR code version.
-#[allow(clippy::missing_panics_doc)] // the panic caused by the expect() will never actually happen since the `version`s are known good constants.
 pub fn encode_auto(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> {
     let segments = Parser::new(data).collect::<Vec<Segment>>();
     for version in &[Version::Normal(9), Version::Normal(26), Version::Normal(40)] {
@@ -1085,7 +1104,7 @@ pub fn encode_auto(data: &[u8], ec_level: EcLevel) -> QrResult<Bits> {
         let total_len = total_encoded_len(&opt_segments, *version);
         let data_capacity = version
             .fetch(ec_level, &DATA_LENGTHS)
-            .expect("invalid DATA_LENGTHS");
+            .expect("invalid `DATA_LENGTHS`");
         if total_len <= data_capacity {
             let min_version = find_min_version(total_len, ec_level);
             let mut bits = Bits::new(min_version);

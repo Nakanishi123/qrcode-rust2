@@ -245,7 +245,8 @@ mod parse_tests {
 
     #[test]
     fn test_parse_shift_jis_example_1() {
-        let segs = parse(b"\x82\xa0\x81\x41\x41\xb1\x81\xf0"); // "あ、AｱÅ"
+        // "あ、AｱÅ"
+        let segs = parse(b"\x82\xa0\x81\x41\x41\xb1\x81\xf0");
         assert_eq!(
             segs,
             &[
@@ -887,84 +888,153 @@ enum Action {
     KanjiAndSingleByte,
 }
 
+// STATE_TRANSITION[current_state + next_character] == (next_state, what_to_do)
 static STATE_TRANSITION: [(State, Action); 70] = [
-    // STATE_TRANSITION[current_state + next_character] == (next_state, what_to_do)
-
     // Init state:
-    (State::Init, Action::Idle),      // End
-    (State::Alpha, Action::Idle),     // Symbol
-    (State::Numeric, Action::Idle),   // Numeric
-    (State::Alpha, Action::Idle),     // Alpha
-    (State::KanjiHi12, Action::Idle), // KanjiHi1
-    (State::KanjiHi12, Action::Idle), // KanjiHi2
-    (State::KanjiHi3, Action::Idle),  // KanjiHi3
-    (State::Byte, Action::Idle),      // KanjiLo1
-    (State::Byte, Action::Idle),      // KanjiLo2
-    (State::Byte, Action::Idle),      // Byte
+    // End
+    (State::Init, Action::Idle),
+    // Symbol
+    (State::Alpha, Action::Idle),
+    // Numeric
+    (State::Numeric, Action::Idle),
+    // Alpha
+    (State::Alpha, Action::Idle),
+    // KanjiHi1
+    (State::KanjiHi12, Action::Idle),
+    // KanjiHi2
+    (State::KanjiHi12, Action::Idle),
+    // KanjiHi3
+    (State::KanjiHi3, Action::Idle),
+    // KanjiLo1
+    (State::Byte, Action::Idle),
+    // KanjiLo2
+    (State::Byte, Action::Idle),
+    // Byte
+    (State::Byte, Action::Idle),
     // Numeric state:
-    (State::Init, Action::Numeric),      // End
-    (State::Alpha, Action::Numeric),     // Symbol
-    (State::Numeric, Action::Idle),      // Numeric
-    (State::Alpha, Action::Numeric),     // Alpha
-    (State::KanjiHi12, Action::Numeric), // KanjiHi1
-    (State::KanjiHi12, Action::Numeric), // KanjiHi2
-    (State::KanjiHi3, Action::Numeric),  // KanjiHi3
-    (State::Byte, Action::Numeric),      // KanjiLo1
-    (State::Byte, Action::Numeric),      // KanjiLo2
-    (State::Byte, Action::Numeric),      // Byte
+    // End
+    (State::Init, Action::Numeric),
+    // Symbol
+    (State::Alpha, Action::Numeric),
+    // Numeric
+    (State::Numeric, Action::Idle),
+    // Alpha
+    (State::Alpha, Action::Numeric),
+    // KanjiHi1
+    (State::KanjiHi12, Action::Numeric),
+    // KanjiHi2
+    (State::KanjiHi12, Action::Numeric),
+    // KanjiHi3
+    (State::KanjiHi3, Action::Numeric),
+    // KanjiLo1
+    (State::Byte, Action::Numeric),
+    // KanjiLo2
+    (State::Byte, Action::Numeric),
+    // Byte
+    (State::Byte, Action::Numeric),
     // Alpha state:
-    (State::Init, Action::Alpha),      // End
-    (State::Alpha, Action::Idle),      // Symbol
-    (State::Numeric, Action::Alpha),   // Numeric
-    (State::Alpha, Action::Idle),      // Alpha
-    (State::KanjiHi12, Action::Alpha), // KanjiHi1
-    (State::KanjiHi12, Action::Alpha), // KanjiHi2
-    (State::KanjiHi3, Action::Alpha),  // KanjiHi3
-    (State::Byte, Action::Alpha),      // KanjiLo1
-    (State::Byte, Action::Alpha),      // KanjiLo2
-    (State::Byte, Action::Alpha),      // Byte
+    // End
+    (State::Init, Action::Alpha),
+    // Symbol
+    (State::Alpha, Action::Idle),
+    // Numeric
+    (State::Numeric, Action::Alpha),
+    // Alpha
+    (State::Alpha, Action::Idle),
+    // KanjiHi1
+    (State::KanjiHi12, Action::Alpha),
+    // KanjiHi2
+    (State::KanjiHi12, Action::Alpha),
+    // KanjiHi3
+    (State::KanjiHi3, Action::Alpha),
+    // KanjiLo1
+    (State::Byte, Action::Alpha),
+    // KanjiLo2
+    (State::Byte, Action::Alpha),
+    // Byte
+    (State::Byte, Action::Alpha),
     // Byte state:
-    (State::Init, Action::Byte),      // End
-    (State::Alpha, Action::Byte),     // Symbol
-    (State::Numeric, Action::Byte),   // Numeric
-    (State::Alpha, Action::Byte),     // Alpha
-    (State::KanjiHi12, Action::Byte), // KanjiHi1
-    (State::KanjiHi12, Action::Byte), // KanjiHi2
-    (State::KanjiHi3, Action::Byte),  // KanjiHi3
-    (State::Byte, Action::Idle),      // KanjiLo1
-    (State::Byte, Action::Idle),      // KanjiLo2
-    (State::Byte, Action::Idle),      // Byte
+    // End
+    (State::Init, Action::Byte),
+    // Symbol
+    (State::Alpha, Action::Byte),
+    // Numeric
+    (State::Numeric, Action::Byte),
+    // Alpha
+    (State::Alpha, Action::Byte),
+    // KanjiHi1
+    (State::KanjiHi12, Action::Byte),
+    // KanjiHi2
+    (State::KanjiHi12, Action::Byte),
+    // KanjiHi3
+    (State::KanjiHi3, Action::Byte),
+    // KanjiLo1
+    (State::Byte, Action::Idle),
+    // KanjiLo2
+    (State::Byte, Action::Idle),
+    // Byte
+    (State::Byte, Action::Idle),
     // KanjiHi12 state:
-    (State::Init, Action::KanjiAndSingleByte),    // End
-    (State::Alpha, Action::KanjiAndSingleByte),   // Symbol
-    (State::Numeric, Action::KanjiAndSingleByte), // Numeric
-    (State::Kanji, Action::Idle),                 // Alpha
-    (State::Kanji, Action::Idle),                 // KanjiHi1
-    (State::Kanji, Action::Idle),                 // KanjiHi2
-    (State::Kanji, Action::Idle),                 // KanjiHi3
-    (State::Kanji, Action::Idle),                 // KanjiLo1
-    (State::Kanji, Action::Idle),                 // KanjiLo2
-    (State::Byte, Action::KanjiAndSingleByte),    // Byte
+    // End
+    (State::Init, Action::KanjiAndSingleByte),
+    // Symbol
+    (State::Alpha, Action::KanjiAndSingleByte),
+    // Numeric
+    (State::Numeric, Action::KanjiAndSingleByte),
+    // Alpha
+    (State::Kanji, Action::Idle),
+    // KanjiHi1
+    (State::Kanji, Action::Idle),
+    // KanjiHi2
+    (State::Kanji, Action::Idle),
+    // KanjiHi3
+    (State::Kanji, Action::Idle),
+    // KanjiLo1
+    (State::Kanji, Action::Idle),
+    // KanjiLo2
+    (State::Kanji, Action::Idle),
+    // Byte
+    (State::Byte, Action::KanjiAndSingleByte),
     // KanjiHi3 state:
-    (State::Init, Action::KanjiAndSingleByte),      // End
-    (State::Alpha, Action::KanjiAndSingleByte),     // Symbol
-    (State::Numeric, Action::KanjiAndSingleByte),   // Numeric
-    (State::Kanji, Action::Idle),                   // Alpha
-    (State::Kanji, Action::Idle),                   // KanjiHi1
-    (State::KanjiHi12, Action::KanjiAndSingleByte), // KanjiHi2
-    (State::KanjiHi3, Action::KanjiAndSingleByte),  // KanjiHi3
-    (State::Kanji, Action::Idle),                   // KanjiLo1
-    (State::Byte, Action::KanjiAndSingleByte),      // KanjiLo2
-    (State::Byte, Action::KanjiAndSingleByte),      // Byte
+    // End
+    (State::Init, Action::KanjiAndSingleByte),
+    // Symbol
+    (State::Alpha, Action::KanjiAndSingleByte),
+    // Numeric
+    (State::Numeric, Action::KanjiAndSingleByte),
+    // Alpha
+    (State::Kanji, Action::Idle),
+    // KanjiHi1
+    (State::Kanji, Action::Idle),
+    // KanjiHi2
+    (State::KanjiHi12, Action::KanjiAndSingleByte),
+    // KanjiHi3
+    (State::KanjiHi3, Action::KanjiAndSingleByte),
+    // KanjiLo1
+    (State::Kanji, Action::Idle),
+    // KanjiLo2
+    (State::Byte, Action::KanjiAndSingleByte),
+    // Byte
+    (State::Byte, Action::KanjiAndSingleByte),
     // Kanji state:
-    (State::Init, Action::Kanji),     // End
-    (State::Alpha, Action::Kanji),    // Symbol
-    (State::Numeric, Action::Kanji),  // Numeric
-    (State::Alpha, Action::Kanji),    // Alpha
-    (State::KanjiHi12, Action::Idle), // KanjiHi1
-    (State::KanjiHi12, Action::Idle), // KanjiHi2
-    (State::KanjiHi3, Action::Idle),  // KanjiHi3
-    (State::Byte, Action::Kanji),     // KanjiLo1
-    (State::Byte, Action::Kanji),     // KanjiLo2
-    (State::Byte, Action::Kanji),     // Byte
+    // End
+    (State::Init, Action::Kanji),
+    // Symbol
+    (State::Alpha, Action::Kanji),
+    // Numeric
+    (State::Numeric, Action::Kanji),
+    // Alpha
+    (State::Alpha, Action::Kanji),
+    // KanjiHi1
+    (State::KanjiHi12, Action::Idle),
+    // KanjiHi2
+    (State::KanjiHi12, Action::Idle),
+    // KanjiHi3
+    (State::KanjiHi3, Action::Idle),
+    // KanjiLo1
+    (State::Byte, Action::Kanji),
+    // KanjiLo2
+    (State::Byte, Action::Kanji),
+    // Byte
+    (State::Byte, Action::Kanji),
 ];
