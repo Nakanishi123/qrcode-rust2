@@ -45,9 +45,6 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
-use alloc::{string::String, vec::Vec};
-use core::ops::Index;
-
 pub mod bits;
 pub mod canvas;
 mod cast;
@@ -55,6 +52,12 @@ pub mod ec;
 pub mod optimize;
 pub mod render;
 pub mod types;
+
+use alloc::{string::String, vec::Vec};
+use core::ops::Index;
+
+#[cfg(feature = "image")]
+pub use image;
 
 pub use crate::types::{Color, EcLevel, QrResult, Version};
 use crate::{

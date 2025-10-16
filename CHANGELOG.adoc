@@ -22,6 +22,7 @@ project adheres to https://semver.org/[Semantic Versioning].
 * Add EPS rendering support
 * Add rMQR code encoder
 * Support automatic determines the smallest Micro QR code
+* Re-export `image` crate ({pull-request-url}/13[#13])
 
 === Changed
 
