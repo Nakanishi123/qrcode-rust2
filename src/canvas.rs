@@ -2470,12 +2470,10 @@ mod data_iter_tests {
 // Data placement
 
 impl Canvas {
-    fn draw_codewords<I: Iterator<Item = (i16, i16)>>(
-        &mut self,
-        codewords: &[u8],
-        is_half_codeword_at_end: bool,
-        coords: &mut I,
-    ) {
+    fn draw_codewords<I>(&mut self, codewords: &[u8], is_half_codeword_at_end: bool, coords: &mut I)
+    where
+        I: Iterator<Item = (i16, i16)>,
+    {
         let length = codewords.len();
         let last_word = if is_half_codeword_at_end {
             length - 1
