@@ -6,6 +6,16 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! String rendering support.
+//!
+//! # Examples
+//!
+//! ```
+//! use qrcode2::QrCode;
+//!
+//! let code = QrCode::new(b"Hello").unwrap();
+//! let s = code.render::<char>().build();
+//! println!("{s}");
+//! ```
 
 use alloc::{string::String, vec, vec::Vec};
 
@@ -28,28 +38,34 @@ pub trait Element: Copy {
 }
 
 impl Element for char {
+    #[inline]
     fn default_color(color: Color) -> Self {
         color.select('\u{2588}', ' ')
     }
 
+    #[inline]
     fn strlen(self) -> usize {
         self.len_utf8()
     }
 
+    #[inline]
     fn append_to_string(self, string: &mut String) {
         string.push(self);
     }
 }
 
 impl Element for &str {
+    #[inline]
     fn default_color(color: Color) -> Self {
         color.select("\u{2588}", " ")
     }
 
+    #[inline]
     fn strlen(self) -> usize {
         self.len()
     }
 
+    #[inline]
     fn append_to_string(self, string: &mut String) {
         string.push_str(self);
     }
@@ -66,13 +82,15 @@ pub struct Canvas<P: Element> {
 }
 
 impl<P: Element> Pixel for P {
-    type Canvas = Canvas<Self>;
     type Image = String;
+    type Canvas = Canvas<Self>;
 
+    #[inline]
     fn default_unit_size() -> (u32, u32) {
         (1, 1)
     }
 
+    #[inline]
     fn default_color(color: Color) -> Self {
         <Self as Element>::default_color(color)
     }
@@ -82,17 +100,20 @@ impl<P: Element> RenderCanvas for Canvas<P> {
     type Pixel = P;
     type Image = String;
 
-    fn new(width: u32, height: u32, dark_pixel: P, light_pixel: P) -> Self {
+    fn new(width: u32, height: u32, dark_pixel: Self::Pixel, light_pixel: Self::Pixel) -> Self {
         let width = width.as_usize();
         let height = height.as_isize();
+        let buffer = vec![light_pixel; width * height.as_usize()];
         let dark_cap = dark_pixel.strlen().as_isize();
         let light_cap = light_pixel.strlen().as_isize();
+        let dark_cap_inc = dark_cap - light_cap;
+        let capacity = light_cap * width.as_isize() * height + (height - 1);
         Self {
-            buffer: vec![light_pixel; width * height.as_usize()],
+            buffer,
             width,
             dark_pixel,
-            dark_cap_inc: dark_cap - light_cap,
-            capacity: light_cap * width.as_isize() * height + (height - 1),
+            dark_cap_inc,
+            capacity,
         }
     }
 
@@ -103,7 +124,7 @@ impl<P: Element> RenderCanvas for Canvas<P> {
         self.buffer[x + y * self.width] = self.dark_pixel;
     }
 
-    fn into_image(self) -> String {
+    fn into_image(self) -> Self::Image {
         let mut result = String::with_capacity(self.capacity.as_usize());
         for (i, pixel) in self.buffer.into_iter().enumerate() {
             if i != 0 && i % self.width == 0 {

@@ -9,10 +9,12 @@
 
 //! The `canvas` module puts raw bits into the QR code canvas.
 //!
+//! # Examples
+//!
 //! ```
 //! use qrcode2::{
+//!     EcLevel, Version,
 //!     canvas::{Canvas, MaskPattern},
-//!     types::{EcLevel, Version},
 //! };
 //!
 //! let mut c = Canvas::new(Version::Normal(1), EcLevel::L);
@@ -22,8 +24,10 @@
 //! let colors = c.into_colors();
 //! ```
 
+#[cfg(test)]
+use alloc::string::String;
 use alloc::{boxed::Box, vec, vec::Vec};
-use core::{cmp::max, iter};
+use core::{cmp, iter};
 
 use crate::{
     cast::As,
@@ -47,6 +51,7 @@ pub enum Module {
 }
 
 impl From<Module> for Color {
+    #[inline]
     fn from(module: Module) -> Self {
         match module {
             Module::Empty => Self::Light,
@@ -58,15 +63,18 @@ impl From<Module> for Color {
 impl Module {
     /// Checks whether a module is dark.
     #[must_use]
+    #[inline]
     pub fn is_dark(self) -> bool {
         Color::from(self) == Color::Dark
     }
 
-    /// Apply a mask to the unmasked modules.
+    /// Applies a mask to the unmasked modules.
+    ///
+    /// # Examples
     ///
     /// ```
-    /// use qrcode2::{canvas::Module, types::Color};
-    ///
+    /// # use qrcode2::{Color, canvas::Module};
+    /// #
     /// assert_eq!(
     ///     Module::Unmasked(Color::Light).mask(true),
     ///     Module::Masked(Color::Dark)
@@ -89,6 +97,7 @@ impl Module {
     /// );
     /// ```
     #[must_use]
+    #[inline]
     pub fn mask(self, should_invert: bool) -> Self {
         match (self, should_invert) {
             (Self::Empty, true) => Self::Masked(Color::Dark),
@@ -125,6 +134,7 @@ pub struct Canvas {
 impl Canvas {
     /// Constructs a new canvas big enough for a QR code of the given version.
     #[must_use]
+    #[inline]
     pub fn new(version: Version, ec_level: EcLevel) -> Self {
         let (width, height) = (version.width(), version.height());
         let modules = vec![Module::Empty; (width * height).as_usize()];
@@ -139,9 +149,9 @@ impl Canvas {
 
     /// Converts the canvas into a human-readable string.
     #[cfg(test)]
-    fn to_debug_str(&self) -> alloc::string::String {
+    fn to_debug_str(&self) -> String {
         let width = self.width;
-        let mut res = alloc::string::String::with_capacity((width * (width + 1)) as usize);
+        let mut res = String::with_capacity((width * (width + 1)) as usize);
         for y in 0..self.height {
             res.push('\n');
             for x in 0..width {
@@ -159,9 +169,9 @@ impl Canvas {
 
     /// Converts the canvas into a human-readable string.
     #[cfg(test)]
-    fn to_debug_str_mask_same(&self) -> alloc::string::String {
+    fn to_debug_str_mask_same(&self) -> String {
         let width = self.width;
-        let mut res = alloc::string::String::with_capacity((width * (width + 1)) as usize);
+        let mut res = String::with_capacity((width * (width + 1)) as usize);
         for y in 0..self.height {
             res.push('\n');
             for x in 0..width {
@@ -186,12 +196,14 @@ impl Canvas {
     /// Obtains a module at the given coordinates. For convenience, negative
     /// coordinates will wrap around.
     #[must_use]
+    #[inline]
     pub fn get(&self, x: i16, y: i16) -> Module {
         self.modules[self.coords_to_index(x, y)]
     }
 
     /// Obtains a mutable module at the given coordinates. For convenience,
     /// negative coordinates will wrap around.
+    #[inline]
     pub fn get_mut(&mut self, x: i16, y: i16) -> &mut Module {
         let index = self.coords_to_index(x, y);
         &mut self.modules[index]
@@ -199,6 +211,7 @@ impl Canvas {
 
     /// Sets the color of a functional module at the given coordinates. For
     /// convenience, negative coordinates will wrap around.
+    #[inline]
     pub fn put(&mut self, x: i16, y: i16, color: Color) {
         *self.get_mut(x, y) = Module::Masked(color);
     }
@@ -206,10 +219,7 @@ impl Canvas {
 
 #[cfg(test)]
 mod basic_canvas_tests {
-    use crate::{
-        canvas::{Canvas, Module},
-        types::{Color, EcLevel, Version},
-    };
+    use super::*;
 
     #[test]
     fn test_index() {
@@ -330,10 +340,7 @@ impl Canvas {
 
 #[cfg(test)]
 mod finder_pattern_tests {
-    use crate::{
-        canvas::Canvas,
-        types::{EcLevel, Version},
-    };
+    use super::*;
 
     #[test]
     fn test_qr() {
@@ -474,10 +481,7 @@ impl Canvas {
 
 #[cfg(test)]
 mod alignment_pattern_tests {
-    use crate::{
-        canvas::Canvas,
-        types::{EcLevel, Version},
-    };
+    use super::*;
 
     #[test]
     fn test_draw_alignment_patterns_1() {
@@ -711,9 +715,9 @@ impl Canvas {
 impl Canvas {
     /// Draws a line from (x1, y1) to (x2, y2), inclusively.
     ///
-    /// The line must be either horizontal or vertical, i.e.
-    /// `x1 == x2 || y1 == y2`. Additionally, the first coordinates must be less
-    /// then the second ones.
+    /// The line must be either horizontal or vertical, i.e. `x1 == x2 || y1 ==
+    /// y2`. Additionally, the first coordinates must be less then the second
+    /// ones.
     ///
     /// On even coordinates, `color_even` will be plotted; on odd coordinates,
     /// `color_odd` will be plotted instead. Thus the timing pattern can be
@@ -815,10 +819,7 @@ impl Canvas {
 
 #[cfg(test)]
 mod timing_pattern_tests {
-    use crate::{
-        canvas::Canvas,
-        types::{EcLevel, Version},
-    };
+    use super::*;
 
     #[test]
     fn test_draw_timing_patterns_qr() {
@@ -938,7 +939,7 @@ impl Canvas {
     /// The 1 bits will be plotted with `on_color` and the 0 bits with
     /// `off_color`. The coordinates will be extracted from the `coords`
     /// iterator. It will start from the most significant bits first, so
-    /// *trailing* zeros will be ignored.
+    /// _trailing_ zeros will be ignored.
     fn draw_number(
         &mut self,
         number: u32,
@@ -1046,10 +1047,7 @@ impl Canvas {
 
 #[cfg(test)]
 mod draw_version_info_tests {
-    use crate::{
-        canvas::Canvas,
-        types::{Color, EcLevel, Version},
-    };
+    use super::*;
 
     #[test]
     fn test_draw_number() {
@@ -1503,12 +1501,12 @@ static RMQR_VERSION_INFOS_R: [[u32; 2]; 32] = [
 // All functional patterns before data placement
 
 impl Canvas {
-    /// Draw all functional patterns, before data placement.
+    /// Draws all functional patterns, before data placement.
     ///
-    /// All functional patterns (e.g. the finder pattern) *except* the format
+    /// All functional patterns (e.g. the finder pattern) _except_ the format
     /// info pattern will be filled in. The format info pattern will be filled
     /// with light modules instead. Data bits can then put in the empty modules.
-    /// with `.draw_data()`.
+    /// with [`Canvas::draw_data`].
     pub fn draw_all_functional_patterns(&mut self) {
         self.draw_finder_patterns();
         self.draw_alignment_patterns();
@@ -1567,10 +1565,7 @@ pub fn is_functional(version: Version, width: i16, x: i16, y: i16) -> bool {
 
 #[cfg(test)]
 mod all_functional_patterns_tests {
-    use crate::{
-        canvas::{Canvas, is_functional},
-        types::{EcLevel, Version},
-    };
+    use super::*;
 
     #[test]
     fn test_all_functional_patterns_qr() {
@@ -1703,9 +1698,10 @@ impl DataModuleIter {
             0
         };
 
+        let (x, y) = (width - 1, height - 1);
         Self {
-            x: width - 1,
-            y: height - 1,
+            x,
+            y,
             width,
             height,
             timing_pattern_column,
@@ -1716,7 +1712,7 @@ impl DataModuleIter {
 impl Iterator for DataModuleIter {
     type Item = (i16, i16);
 
-    fn next(&mut self) -> Option<(i16, i16)> {
+    fn next(&mut self) -> Option<Self::Item> {
         let adjusted_ref_col = if self.x <= self.timing_pattern_column {
             self.x + 1
         } else {
@@ -1752,16 +1748,14 @@ impl Iterator for DataModuleIter {
 
 #[cfg(test)]
 mod data_iter_tests {
-    use alloc::{vec, vec::Vec};
-
-    use crate::{canvas::DataModuleIter, types::Version};
+    use super::*;
 
     #[test]
     fn test_qr() {
         let res = DataModuleIter::new(Version::Normal(1)).collect::<Vec<(i16, i16)>>();
         assert_eq!(
             res,
-            vec![
+            [
                 (20, 20),
                 (19, 20),
                 (20, 19),
@@ -2191,7 +2185,7 @@ mod data_iter_tests {
         let res = DataModuleIter::new(Version::Micro(1)).collect::<Vec<(i16, i16)>>();
         assert_eq!(
             res,
-            vec![
+            [
                 (10, 10),
                 (9, 10),
                 (10, 9),
@@ -2311,7 +2305,7 @@ mod data_iter_tests {
         let res = DataModuleIter::new(Version::Micro(2)).collect::<Vec<(i16, i16)>>();
         assert_eq!(
             res,
-            vec![
+            [
                 (12, 12),
                 (11, 12),
                 (12, 11),
@@ -2476,10 +2470,12 @@ mod data_iter_tests {
 // Data placement
 
 impl Canvas {
-    fn draw_codewords<I>(&mut self, codewords: &[u8], is_half_codeword_at_end: bool, coords: &mut I)
-    where
-        I: Iterator<Item = (i16, i16)>,
-    {
+    fn draw_codewords<I: Iterator<Item = (i16, i16)>>(
+        &mut self,
+        codewords: &[u8],
+        is_half_codeword_at_end: bool,
+        coords: &mut I,
+    ) {
         let length = codewords.len();
         let last_word = if is_half_codeword_at_end {
             length - 1
@@ -2520,10 +2516,7 @@ impl Canvas {
 
 #[cfg(test)]
 mod draw_codewords_test {
-    use crate::{
-        canvas::Canvas,
-        types::{EcLevel, Version},
-    };
+    use super::*;
 
     #[test]
     fn test_micro_qr_1() {
@@ -2608,6 +2601,7 @@ mod draw_codewords_test {
         );
     }
 }
+
 // Masking
 
 /// The mask patterns. Since QR code and Micro QR code do not use the same
@@ -2643,24 +2637,31 @@ mod mask_functions {
     pub const fn checkerboard(x: i16, y: i16) -> bool {
         (x + y) % 2 == 0
     }
+
     pub const fn horizontal_lines(_: i16, y: i16) -> bool {
         y % 2 == 0
     }
+
     pub const fn vertical_lines(x: i16, _: i16) -> bool {
         x % 3 == 0
     }
+
     pub const fn diagonal_lines(x: i16, y: i16) -> bool {
         (x + y) % 3 == 0
     }
+
     pub const fn large_checkerboard(x: i16, y: i16) -> bool {
         ((y / 2) + (x / 3)) % 2 == 0
     }
+
     pub const fn fields(x: i16, y: i16) -> bool {
         (x * y) % 2 + (x * y) % 3 == 0
     }
+
     pub const fn diamonds(x: i16, y: i16) -> bool {
         ((x * y) % 2 + (x * y) % 3) % 2 == 0
     }
+
     pub const fn meadow(x: i16, y: i16) -> bool {
         ((x + y) % 2 + (x * y) % 3) % 2 == 0
     }
@@ -2739,10 +2740,7 @@ impl Canvas {
 
 #[cfg(test)]
 mod mask_tests {
-    use crate::{
-        canvas::{Canvas, MaskPattern},
-        types::{EcLevel, Version},
-    };
+    use super::*;
 
     #[test]
     fn test_apply_mask_qr() {
@@ -2847,7 +2845,7 @@ static FORMAT_INFOS_MICRO_QR: [u16; 32] = [
 // Penalty score
 
 impl Canvas {
-    /// Compute the penalty score for having too many adjacent modules with the
+    /// Computes the penalty score for having too many adjacent modules with the
     /// same color.
     ///
     /// Every 5+N adjacent modules in the same column/row having the same color
@@ -2884,7 +2882,7 @@ impl Canvas {
         total_score
     }
 
-    /// Compute the penalty score for having too many rectangles with the same
+    /// Computes the penalty score for having too many rectangles with the same
     /// color.
     ///
     /// Every 2×2 blocks (with overlapping counted) having the same color will
@@ -2907,7 +2905,7 @@ impl Canvas {
         total_score
     }
 
-    /// Compute the penalty score for having a pattern similar to the finder
+    /// Computes the penalty score for having a pattern similar to the finder
     /// pattern in the wrong place.
     ///
     /// Every pattern that looks like `#.###.#....` in any orientation will add
@@ -2948,14 +2946,18 @@ impl Canvas {
         total_score - 360
     }
 
-    /// Compute the penalty score for having an unbalanced dark/light ratio.
+    /// Computes the penalty score for having an unbalanced dark/light ratio.
     ///
     /// The score is given linearly by the deviation from a 50% ratio of dark
     /// modules. The highest possible score is 100.
     ///
+    /// <div class="warning">
+    ///
     /// Note that this algorithm differs slightly from the standard we do not
     /// round the result every 5%, but the difference should be negligible and
     /// should not affect which mask is chosen.
+    ///
+    /// </div>
     fn compute_balance_penalty_score(&self) -> u16 {
         let dark_modules = self.modules.iter().filter(|m| m.is_dark()).count();
         let total_modules = self.modules.len();
@@ -2963,14 +2965,18 @@ impl Canvas {
         ratio.abs_diff(100).as_u16()
     }
 
-    /// Compute the penalty score for having too many light modules on the
+    /// Computes the penalty score for having too many light modules on the
     /// sides.
     ///
     /// This penalty score is exclusive to Micro QR code.
     ///
+    /// <div class="warning">
+    ///
     /// Note that the standard gives the formula for *efficiency* score, which
     /// has the inverse meaning of this method, but it is very easy to convert
     /// between the two (this score is (16×width − standard-score)).
+    ///
+    /// </div>
     fn compute_light_side_penalty_score(&self) -> u16 {
         let h = (1..self.width)
             .filter(|j| !self.get(*j, -1).is_dark())
@@ -2979,11 +2985,11 @@ impl Canvas {
             .filter(|j| !self.get(-1, *j).is_dark())
             .count();
 
-        (h + v + 15 * max(h, v)).as_u16()
+        (h + v + 15 * cmp::max(h, v)).as_u16()
     }
 
-    /// Compute the total penalty scores. A QR code having higher points is less
-    /// desirable.
+    /// Computes the total penalty scores. A QR code having higher points is
+    /// less desirable.
     fn compute_total_penalty_scores(&self) -> u16 {
         match self.version {
             Version::Normal(_) => {
@@ -3003,10 +3009,7 @@ impl Canvas {
 
 #[cfg(test)]
 mod penalty_tests {
-    use crate::{
-        canvas::{Canvas, MaskPattern},
-        types::{Color, EcLevel, Version},
-    };
+    use super::*;
 
     fn create_test_canvas() -> Canvas {
         let mut c = Canvas::new(Version::Normal(1), EcLevel::Q);
@@ -3150,7 +3153,7 @@ static ALL_PATTERNS_RMQR: [MaskPattern; 1] = [MaskPattern::LargeCheckerboard];
 
 impl Canvas {
     #[allow(clippy::missing_panics_doc)]
-    /// Construct a new canvas and apply the best masking that gives the lowest
+    /// Constructs a new canvas and apply the best masking that gives the lowest
     /// penalty score.
     #[must_use]
     pub fn apply_best_mask(&self) -> Self {
@@ -3168,7 +3171,7 @@ impl Canvas {
         .expect("at least one pattern")
     }
 
-    /// Convert the modules into a vector of colors.
+    /// Converts the modules into a vector of colors.
     pub fn into_colors(self) -> Vec<Color> {
         self.modules.into_iter().map(Color::from).collect()
     }

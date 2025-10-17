@@ -16,13 +16,13 @@ use crate::types::{EcLevel, QrResult, Version};
 
 /// Creates the error correction code in N bytes.
 ///
-/// This method only supports computing the error-correction code up to
-/// 69 bytes. Longer blocks will result in task panic.
+/// This method only supports computing the error-correction code up to 69
+/// bytes. Longer blocks will result in task panic.
 ///
-/// This method treats the data as a polynomial of the form
-/// (a\[0\] x<sup>m+n</sup> + a\[1\] x<sup>m+n-1</sup> + … + a\[m\]
-/// x<sup>n</sup>) in GF(2<sup>8</sup>), and then computes the polynomial
-/// modulus with a generator polynomial of degree N.
+/// This method treats the data as a polynomial of the form (a\[0\]
+/// x<sup>m+n</sup> + a\[1\] x<sup>m+n-1</sup> + … + a\[m\] x<sup>n</sup>) in
+/// GF(2<sup>8</sup>), and then computes the polynomial modulus with a generator
+/// polynomial of degree N.
 #[must_use]
 pub fn create_error_correction_code(data: &[u8], ec_code_size: usize) -> Vec<u8> {
     let data_len = data.len();
@@ -31,7 +31,6 @@ pub fn create_error_correction_code(data: &[u8], ec_code_size: usize) -> Vec<u8>
     let mut res = data.to_vec();
     res.resize(ec_code_size + data_len, 0);
 
-    // rust-lang-nursery/rust-clippy#2213
     for i in 0..data_len {
         let lead_coeff = res[i] as usize;
         if lead_coeff == 0 {
@@ -49,7 +48,7 @@ pub fn create_error_correction_code(data: &[u8], ec_code_size: usize) -> Vec<u8>
 
 #[cfg(test)]
 mod ec_tests {
-    use crate::ec::create_error_correction_code;
+    use super::*;
 
     #[test]
     fn test_poly_mod_1() {
@@ -108,9 +107,8 @@ fn test_interleave() {
 ///
 /// # Errors
 ///
-/// Returns `Err(QrError::InvalidVersion)` if it is not valid to use the
-///  `ec_level` for the given version (e.g. `Version::Micro(1)` with
-/// `EcLevel::H`).
+/// Returns [`Err`] if it is not valid to use the `ec_level` for the given
+/// version (e.g. [`Version::Micro(1)`](Version::Micro) with [`EcLevel::H`]).
 pub fn construct_codewords(
     rawbits: &[u8],
     version: Version,
@@ -147,10 +145,7 @@ pub fn construct_codewords(
 
 #[cfg(test)]
 mod construct_codewords_test {
-    use crate::{
-        ec::construct_codewords,
-        types::{EcLevel, Version},
-    };
+    use super::*;
 
     #[test]
     fn test_add_ec_simple() {
@@ -189,19 +184,14 @@ mod construct_codewords_test {
 ///
 /// # Errors
 ///
-/// Returns `Err(QrError::InvalidVersion)` if it is not valid to use the
-///  `ec_level` for the given version (e.g. `Version::Micro(1)` with
-/// `EcLevel::H`).
+/// Returns [`Err`] if it is not valid to use the `ec_level` for the given
+/// version (e.g. [`Version::Micro(1)`](Version::Micro) with [`EcLevel::H`]).
 pub fn max_allowed_errors(version: Version, ec_level: EcLevel) -> QrResult<usize> {
-    use crate::{
-        EcLevel::{L, M},
-        Version::{Micro, Normal},
-    };
-
     let p = match (version, ec_level) {
-        (Micro(2) | Normal(1), L) => 3,
-        (Micro(_) | Normal(2), L) | (Micro(2) | Normal(1), M) => 2,
-        (Normal(1), _) | (Normal(3), L) => 1,
+        (Version::Micro(2) | Version::Normal(1), EcLevel::L) => 3,
+        (Version::Micro(_) | Version::Normal(2), EcLevel::L)
+        | (Version::Micro(2) | Version::Normal(1), EcLevel::M) => 2,
+        (Version::Normal(1), _) | (Version::Normal(3), EcLevel::L) => 1,
         _ => 0,
     };
 
@@ -214,10 +204,7 @@ pub fn max_allowed_errors(version: Version, ec_level: EcLevel) -> QrResult<usize
 
 #[cfg(test)]
 mod max_allowed_errors_test {
-    use crate::{
-        ec::max_allowed_errors,
-        types::{EcLevel, Version},
-    };
+    use super::*;
 
     #[test]
     fn test_low_versions() {
@@ -357,8 +344,8 @@ static LOG_TABLE: &[u8] = b"\
 /// The generator polynomial list.
 ///
 /// `GENERATOR_POLYNOMIALS[i]` is the polynomial for `i` error correction code
-/// words. Each entry encodes the log coefficients of the expanded polynomial
-/// (x − 2<sup>0</sup>)(x − 2<sup>1</sup>)…(x − 2<sup>i-1</sup>). Each entry is
+/// words. Each entry encodes the log coefficients of the expanded polynomial (x
+/// − 2<sup>0</sup>)(x − 2<sup>1</sup>)…(x − 2<sup>i-1</sup>). Each entry is
 /// used as the denominator for polynomial division to obtain the modulus which
 /// is the Reed-Solomon error correction code.
 ///

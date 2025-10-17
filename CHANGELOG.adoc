@@ -33,6 +33,7 @@ project adheres to https://semver.org/[Semantic Versioning].
 * Change behavior of `Version::is_micro` to return `false` if the parameter is
   out of the valid range
 * Rename crate to `qrcode2`
+* Make the `Error` trait available in `no_std` mode ({pull-request-url}/14[#14])
 
 === Removed
 

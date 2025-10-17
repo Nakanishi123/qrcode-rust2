@@ -6,19 +6,19 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-//! SVG rendering support.
+//! [SVG] rendering support.
 //!
-//! # Example
+//! # Examples
 //!
 //! ```
-//! use qrcode2::QrCode;
-//! use qrcode2::render::svg;
+//! use qrcode2::{QrCode, render::svg::Color};
 //!
 //! let code = QrCode::new(b"Hello").unwrap();
-//! let svg_xml = code.render::<svg::Color>().build();
+//! let svg_xml = code.render::<Color>().build();
 //! println!("{svg_xml}");
-
-#![cfg(feature = "svg")]
+//! ```
+//!
+//! [SVG]: https://www.w3.org/Graphics/SVG/
 
 use alloc::{format, string::String};
 use core::{fmt::Write, marker::PhantomData};
@@ -29,13 +29,22 @@ use crate::{
 };
 
 /// An SVG color.
+///
+/// <div class="warning">
+///
+/// The color value must comply with the W3C's [CSS Color Module Level 4].
+///
+/// </div>
+///
+/// [CSS Color Module Level 4]: https://www.w3.org/TR/css-color-4/
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Color<'a>(pub &'a str);
 
 impl<'a> Pixel for Color<'a> {
-    type Canvas = Canvas<'a>;
     type Image = String;
+    type Canvas = Canvas<'a>;
 
+    #[inline]
     fn default_color(color: ModuleColor) -> Self {
         Color(color.select("#000", "#fff"))
     }
@@ -52,35 +61,40 @@ impl<'a> RenderCanvas for Canvas<'a> {
     type Pixel = Color<'a>;
     type Image = String;
 
-    fn new(width: u32, height: u32, dark_pixel: Color<'a>, light_pixel: Color<'a>) -> Self {
-        Canvas {
-            svg: format!(
-                concat!(
-                    r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>"#,
-                    r#"<svg xmlns="http://www.w3.org/2000/svg""#,
-                    r#" version="1.1" width="{w}" height="{h}""#,
-                    r#" viewBox="0 0 {w} {h}" shape-rendering="crispEdges">"#,
-                    r#"<path d="M0 0h{w}v{h}H0z" fill="{bg}"/>"#,
-                    r#"<path fill="{fg}" d=""#,
-                ),
-                w = width,
-                h = height,
-                fg = dark_pixel.0,
-                bg = light_pixel.0
+    #[inline]
+    fn new(width: u32, height: u32, dark_pixel: Self::Pixel, light_pixel: Self::Pixel) -> Self {
+        let svg = format!(
+            concat!(
+                r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>"#,
+                r#"<svg xmlns="http://www.w3.org/2000/svg""#,
+                r#" version="1.1" width="{w}" height="{h}""#,
+                r#" viewBox="0 0 {w} {h}" shape-rendering="crispEdges">"#,
+                r#"<path d="M0 0h{w}v{h}H0z" fill="{bg}"/>"#,
+                r#"<path fill="{fg}" d=""#
             ),
+            w = width,
+            h = height,
+            fg = dark_pixel.0,
+            bg = light_pixel.0
+        );
+        Self {
+            svg,
             marker: PhantomData,
         }
     }
 
+    #[inline]
     fn draw_dark_pixel(&mut self, x: u32, y: u32) {
         self.draw_dark_rect(x, y, 1, 1);
     }
 
+    #[inline]
     fn draw_dark_rect(&mut self, left: u32, top: u32, width: u32, height: u32) {
         write!(self.svg, "M{left} {top}h{width}v{height}h-{width}z").unwrap();
     }
 
-    fn into_image(mut self) -> String {
+    #[inline]
+    fn into_image(mut self) -> Self::Image {
         self.svg.push_str(r#""/></svg>"#);
         self.svg
     }

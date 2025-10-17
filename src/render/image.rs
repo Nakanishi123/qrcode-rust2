@@ -7,8 +7,17 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Raster image rendering support powered by the [`image`] crate.
-
-#![cfg(feature = "image")]
+//!
+//! # Examples
+//!
+//! ```
+//! use qrcode2::{QrCode, image::Luma};
+//!
+//! let code = QrCode::new(b"Hello").unwrap();
+//! let image = code.render::<Luma<u8>>().build();
+//! let temp_dir = tempfile::tempdir().unwrap();
+//! image.save(temp_dir.path().join("qrcode.png")).unwrap();
+//! ```
 
 use alloc::vec::Vec;
 
@@ -19,58 +28,93 @@ use crate::{
     types::Color,
 };
 
-// need to keep using this macro to implement Pixel separately for each color
-// model, otherwise we'll have conflicting impl with `impl Pixel for impl
-// Element` 🤷
-macro_rules! impl_pixel_for_image_pixel {
-    ($p:ident < $s:ident > : $c:pat => $d:expr_2021) => {
-        impl<$s> Pixel for $p<$s>
-        where
-            $s: Primitive + 'static,
-            $p<$s>: image::Pixel<Subpixel = $s>,
-        {
-            type Image = ImageBuffer<Self, Vec<$s>>;
-            type Canvas = (Self, Self::Image);
+impl<S> Pixel for Luma<S>
+where
+    S: Primitive + 'static,
+    Self: image::Pixel<Subpixel = S>,
+{
+    type Image = ImageBuffer<Self, Vec<S>>;
+    type Canvas = (Self, Self::Image);
 
-            fn default_color(color: Color) -> Self {
-                match color.select($s::zero(), $s::max_value()) {
-                    $c => $p($d),
-                }
-            }
-        }
-    };
+    #[inline]
+    fn default_color(color: Color) -> Self {
+        let p = color.select(S::zero(), S::max_value());
+        Self([p])
+    }
 }
 
-impl_pixel_for_image_pixel! { Luma<S>: p => [p] }
-impl_pixel_for_image_pixel! { LumaA<S>: p => [p, S::max_value()] }
-impl_pixel_for_image_pixel! { Rgb<S>: p => [p, p, p] }
-impl_pixel_for_image_pixel! { Rgba<S>: p => [p, p, p, S::max_value()] }
+impl<S> Pixel for LumaA<S>
+where
+    S: Primitive + 'static,
+    Self: image::Pixel<Subpixel = S>,
+{
+    type Image = ImageBuffer<Self, Vec<S>>;
+    type Canvas = (Self, Self::Image);
+
+    #[inline]
+    fn default_color(color: Color) -> Self {
+        let p = color.select(S::zero(), S::max_value());
+        Self([p, S::max_value()])
+    }
+}
+
+impl<S> Pixel for Rgb<S>
+where
+    S: Primitive + 'static,
+    Self: image::Pixel<Subpixel = S>,
+{
+    type Image = ImageBuffer<Self, Vec<S>>;
+    type Canvas = (Self, Self::Image);
+
+    #[inline]
+    fn default_color(color: Color) -> Self {
+        let p = color.select(S::zero(), S::max_value());
+        Self([p, p, p])
+    }
+}
+
+impl<S> Pixel for Rgba<S>
+where
+    S: Primitive + 'static,
+    Self: image::Pixel<Subpixel = S>,
+{
+    type Image = ImageBuffer<Self, Vec<S>>;
+    type Canvas = (Self, Self::Image);
+
+    #[inline]
+    fn default_color(color: Color) -> Self {
+        let p = color.select(S::zero(), S::max_value());
+        Self([p, p, p, S::max_value()])
+    }
+}
 
 impl<P: image::Pixel + 'static> Canvas for (P, ImageBuffer<P, Vec<P::Subpixel>>) {
     type Pixel = P;
     type Image = ImageBuffer<P, Vec<P::Subpixel>>;
 
-    fn new(width: u32, height: u32, dark_pixel: P, light_pixel: P) -> Self {
+    #[inline]
+    fn new(width: u32, height: u32, dark_pixel: Self::Pixel, light_pixel: Self::Pixel) -> Self {
         (
             dark_pixel,
             ImageBuffer::from_pixel(width, height, light_pixel),
         )
     }
 
+    #[inline]
     fn draw_dark_pixel(&mut self, x: u32, y: u32) {
         self.1.put_pixel(x, y, self.0);
     }
 
-    fn into_image(self) -> ImageBuffer<P, Vec<P::Subpixel>> {
+    #[inline]
+    fn into_image(self) -> Self::Image {
         self.1
     }
 }
 
 #[cfg(test)]
 mod render_tests {
-    use image::{Luma, Rgba};
-
-    use crate::{render::Renderer, types::Color};
+    use super::*;
+    use crate::render::Renderer;
 
     #[test]
     fn test_render_luma8_unsized() {

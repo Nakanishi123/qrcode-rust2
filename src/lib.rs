@@ -7,16 +7,17 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-//! QR Code encoder
+//! The `qrcode2` crate is a [QR code] encoding library.
 //!
-//! This crate provides a QR code, Micro QR code and rMQR code encoder for
-//! binary data.
+//! This crate provides a [normal QR code], [Micro QR code], and [rMQR code]
+//! encoder for binary data.
+//!
+//! # Examples
 //!
 //! ```
 //! # #[cfg(feature = "image")]
 //! # {
-//! use image::Luma;
-//! use qrcode2::QrCode;
+//! use qrcode2::{QrCode, image::Luma};
 //!
 //! // Encode some data into bits.
 //! let code = QrCode::new(b"01234567").unwrap();
@@ -25,15 +26,19 @@
 //! let image = code.render::<Luma<u8>>().build();
 //!
 //! // Save the image.
-//! # if cfg!(unix) {
-//! image.save("/tmp/qrcode.png").unwrap();
-//! # }
+//! let temp_dir = tempfile::tempdir().unwrap();
+//! image.save(temp_dir.path().join("qrcode.png")).unwrap();
 //!
 //! // You can also render it into a string.
 //! let string = code.render().light_color(' ').dark_color('#').build();
 //! println!("{string}");
 //! # }
 //! ```
+//!
+//! [QR code]: https://www.qrcode.com/
+//! [normal QR code]: https://www.qrcode.com/codes/model12.html
+//! [Micro QR code]: https://www.qrcode.com/codes/microqr.html
+//! [rMQR code]: https://www.qrcode.com/codes/rmqr.html
 
 #![doc(html_root_url = "https://docs.rs/qrcode2/0.14.1/")]
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -61,7 +66,8 @@ pub use image;
 
 pub use crate::types::{Color, EcLevel, QrResult, Version};
 use crate::{
-    bits::RectMicroStrategy,
+    bits::{Bits, RectMicroStrategy},
+    canvas::Canvas,
     cast::As,
     render::{Pixel, Renderer},
 };
@@ -82,17 +88,20 @@ impl QrCode {
     /// This method uses the "medium" error correction level and automatically
     /// chooses the smallest QR code.
     ///
-    /// ```
-    /// use qrcode2::QrCode;
-    ///
-    /// let code = QrCode::new(b"Some data").unwrap();
-    /// ```
-    ///
     /// # Errors
     ///
-    /// Returns error if the QR code cannot be constructed, e.g. when the data
+    /// Returns [`Err`] if the QR code cannot be constructed, e.g. when the data
     /// is too long.
-    pub fn new<D: AsRef<[u8]>>(data: D) -> QrResult<Self> {
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::QrCode;
+    /// #
+    /// let code = QrCode::new(b"Some data").unwrap();
+    /// ```
+    #[inline]
+    pub fn new(data: impl AsRef<[u8]>) -> QrResult<Self> {
         Self::with_error_correction_level(data, EcLevel::M)
     }
 
@@ -102,36 +111,42 @@ impl QrCode {
     /// This method uses the "medium" error correction level and automatically
     /// chooses the smallest Micro QR code.
     ///
-    /// ```
-    /// use qrcode2::QrCode;
-    ///
-    /// let code = QrCode::new_micro(b"Some data").unwrap();
-    /// ```
-    ///
     /// # Errors
     ///
-    /// Returns error if the Micro QR code cannot be constructed, e.g. when the
-    /// data is too long.
-    pub fn new_micro<D: AsRef<[u8]>>(data: D) -> QrResult<Self> {
+    /// Returns [`Err`] if the Micro QR code cannot be constructed, e.g. when
+    /// the data is too long.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::QrCode;
+    /// #
+    /// let code = QrCode::new_micro(b"Some data").unwrap();
+    /// ```
+    #[inline]
+    pub fn new_micro(data: impl AsRef<[u8]>) -> QrResult<Self> {
         Self::micro_with_error_correction_level(data, EcLevel::M)
     }
 
     /// Constructs a new rMQR code which automatically encodes the given data.
     ///
     /// This method uses the "medium" error correction level and automatically
-    /// chooses the smallest rMQR code.
-    ///
-    /// ```
-    /// use qrcode2::QrCode;
-    ///
-    /// let code = QrCode::new_rect_micro(b"Some data").unwrap();
-    /// ```
+    /// chooses the smallest rMQR code based on [`RectMicroStrategy::Area`].
     ///
     /// # Errors
     ///
-    /// Returns error if the rMQR code cannot be constructed, e.g. when the data
-    /// is too long.
-    pub fn new_rect_micro<D: AsRef<[u8]>>(data: D) -> QrResult<Self> {
+    /// Returns [`Err`] if the rMQR code cannot be constructed, e.g. when the
+    /// data is too long.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::QrCode;
+    /// #
+    /// let code = QrCode::new_rect_micro(b"Some data").unwrap();
+    /// ```
+    #[inline]
+    pub fn new_rect_micro(data: impl AsRef<[u8]>) -> QrResult<Self> {
         Self::rect_micro_with_error_correction_level(data, EcLevel::M)
     }
 
@@ -140,18 +155,21 @@ impl QrCode {
     ///
     /// This method automatically chooses the smallest QR code.
     ///
-    /// ```
-    /// use qrcode2::{EcLevel, QrCode};
-    ///
-    /// let code = QrCode::with_error_correction_level(b"Some data", EcLevel::H).unwrap();
-    /// ```
-    ///
     /// # Errors
     ///
-    /// Returns error if the QR code cannot be constructed, e.g. when the data
+    /// Returns [`Err`] if the QR code cannot be constructed, e.g. when the data
     /// is too long.
-    pub fn with_error_correction_level<D: AsRef<[u8]>>(
-        data: D,
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::{EcLevel, QrCode};
+    /// #
+    /// let code = QrCode::with_error_correction_level(b"Some data", EcLevel::H).unwrap();
+    /// ```
+    #[inline]
+    pub fn with_error_correction_level(
+        data: impl AsRef<[u8]>,
         ec_level: EcLevel,
     ) -> QrResult<Self> {
         let bits = bits::encode_auto(data.as_ref(), ec_level)?;
@@ -163,18 +181,21 @@ impl QrCode {
     ///
     /// This method automatically chooses the smallest Micro QR code.
     ///
-    /// ```
-    /// use qrcode2::{EcLevel, QrCode};
-    ///
-    /// let code = QrCode::micro_with_error_correction_level(b"Some data", EcLevel::Q).unwrap();
-    /// ```
-    ///
     /// # Errors
     ///
-    /// Returns error if the Micro QR code cannot be constructed, e.g. when the
-    /// data is too long.
-    pub fn micro_with_error_correction_level<D: AsRef<[u8]>>(
-        data: D,
+    /// Returns [`Err`] if the Micro QR code cannot be constructed, e.g. when
+    /// the data is too long.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::{EcLevel, QrCode};
+    /// #
+    /// let code = QrCode::micro_with_error_correction_level(b"Some data", EcLevel::Q).unwrap();
+    /// ```
+    #[inline]
+    pub fn micro_with_error_correction_level(
+        data: impl AsRef<[u8]>,
         ec_level: EcLevel,
     ) -> QrResult<Self> {
         let bits = bits::encode_auto_micro(data.as_ref(), ec_level)?;
@@ -187,18 +208,21 @@ impl QrCode {
     /// This method automatically chooses the smallest rMQR code based on
     /// [`RectMicroStrategy::Area`].
     ///
-    /// ```
-    /// use qrcode2::{EcLevel, QrCode};
-    ///
-    /// let code = QrCode::rect_micro_with_error_correction_level(b"Some data", EcLevel::H).unwrap();
-    /// ```
-    ///
     /// # Errors
     ///
-    /// Returns error if the rMQR code cannot be constructed, e.g. when the data
-    /// is too long.
-    pub fn rect_micro_with_error_correction_level<D: AsRef<[u8]>>(
-        data: D,
+    /// Returns [`Err`] if the rMQR code cannot be constructed, e.g. when the
+    /// data is too long.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::{EcLevel, QrCode};
+    /// #
+    /// let code = QrCode::rect_micro_with_error_correction_level(b"Some data", EcLevel::H).unwrap();
+    /// ```
+    #[inline]
+    pub fn rect_micro_with_error_correction_level(
+        data: impl AsRef<[u8]>,
         ec_level: EcLevel,
     ) -> QrResult<Self> {
         let bits = bits::encode_auto_rect_micro(data.as_ref(), ec_level, RectMicroStrategy::Area)?;
@@ -208,32 +232,34 @@ impl QrCode {
     /// Constructs a new QR code for the given version and error correction
     /// level.
     ///
-    /// ```
-    /// use qrcode2::{EcLevel, QrCode, Version};
+    /// # Errors
     ///
+    /// Returns [`Err`] if the QR code cannot be constructed, e.g. when the data
+    /// is too long, or when the version and error correction level are
+    /// incompatible.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::{EcLevel, QrCode, Version};
+    /// #
     /// let code = QrCode::with_version(b"Some data", Version::Normal(5), EcLevel::M).unwrap();
     /// ```
     ///
     /// This method can also be used to generate Micro QR code or rMQR code.
     ///
     /// ```
-    /// use qrcode2::{EcLevel, QrCode, Version};
-    ///
+    /// # use qrcode2::{EcLevel, QrCode, Version};
+    /// #
     /// let micro_code = QrCode::with_version(b"123", Version::Micro(1), EcLevel::L).unwrap();
     /// let rmqr_code = QrCode::with_version(b"456", Version::RectMicro(7, 43), EcLevel::M).unwrap();
     /// ```
-    ///
-    /// # Errors
-    ///
-    /// Returns error if the QR code cannot be constructed, e.g. when the data
-    /// is too long, or when the version and error correction level are
-    /// incompatible.
-    pub fn with_version<D: AsRef<[u8]>>(
-        data: D,
+    pub fn with_version(
+        data: impl AsRef<[u8]>,
         version: Version,
         ec_level: EcLevel,
     ) -> QrResult<Self> {
-        let mut bits = bits::Bits::new(version);
+        let mut bits = Bits::new(version);
         bits.push_optimal_data(data.as_ref())?;
         bits.push_terminator(ec_level)?;
         Self::with_bits(bits, ec_level)
@@ -244,52 +270,75 @@ impl QrCode {
     /// Use this method only if there are very special need to manipulate the
     /// raw bits before encoding. Some examples are:
     ///
-    /// * Encode data using specific character set with ECI
-    /// * Use the FNC1 modes
-    /// * Avoid the optimal segmentation algorithm
+    /// - Encode data using specific character set with ECI
+    /// - Use the FNC1 modes
+    /// - Avoid the optimal segmentation algorithm
     ///
-    /// See the `Bits` structure for detail.
+    /// See the [`Bits`] structure for detail.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Err`] if the QR code cannot be constructed, e.g. when the bits
+    /// are too long, or when the version and error correction level are
+    /// incompatible.
+    ///
+    /// # Examples
     ///
     /// ```
-    /// use qrcode2::{EcLevel, QrCode, Version, bits::Bits};
-    ///
+    /// # use qrcode2::{EcLevel, QrCode, Version, bits::Bits};
+    /// #
     /// let mut bits = Bits::new(Version::Normal(1));
     /// bits.push_eci_designator(9);
     /// bits.push_byte_data(b"\xca\xfe\xe4\xe9\xea\xe1\xf2 QR");
     /// bits.push_terminator(EcLevel::L);
     /// let qrcode = QrCode::with_bits(bits, EcLevel::L);
     /// ```
-    ///
-    /// # Errors
-    ///
-    /// Returns error if the QR code cannot be constructed, e.g. when the bits
-    /// are too long, or when the version and error correction level are
-    /// incompatible.
-    pub fn with_bits(bits: bits::Bits, ec_level: EcLevel) -> QrResult<Self> {
+    pub fn with_bits(bits: Bits, ec_level: EcLevel) -> QrResult<Self> {
         let version = bits.version();
         let data = bits.into_bytes();
         let (encoded_data, ec_data) = ec::construct_codewords(&data, version, ec_level)?;
-        let mut canvas = canvas::Canvas::new(version, ec_level);
+        let mut canvas = Canvas::new(version, ec_level);
         canvas.draw_all_functional_patterns();
         canvas.draw_data(&encoded_data, &ec_data);
-        let canvas = canvas.apply_best_mask();
+        let content = canvas.apply_best_mask().into_colors();
+        let (width, height) = (version.width().as_usize(), version.height().as_usize());
         Ok(Self {
-            content: canvas.into_colors(),
+            content,
             version,
             ec_level,
-            width: version.width().as_usize(),
-            height: version.height().as_usize(),
+            width,
+            height,
         })
     }
 
     /// Gets the version of this QR code.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::{QrCode, Version};
+    /// #
+    /// let code = QrCode::new(b"Some data").unwrap();
+    /// assert_eq!(code.version(), Version::Normal(1));
+    /// ```
     #[must_use]
+    #[inline]
     pub const fn version(&self) -> Version {
         self.version
     }
 
     /// Gets the error correction level of this QR code.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::{EcLevel, QrCode};
+    /// #
+    /// let code = QrCode::new(b"Some data").unwrap();
+    /// assert_eq!(code.error_correction_level(), EcLevel::M);
+    /// ```
     #[must_use]
+    #[inline]
     pub const fn error_correction_level(&self) -> EcLevel {
         self.ec_level
     }
@@ -297,7 +346,17 @@ impl QrCode {
     /// Gets the number of modules per side, i.e. the width of this QR code.
     ///
     /// The width here does not contain the quiet zone paddings.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::QrCode;
+    /// #
+    /// let code = QrCode::new_rect_micro(b"Some data").unwrap();
+    /// assert_eq!(code.width(), 27);
+    /// ```
     #[must_use]
+    #[inline]
     pub const fn width(&self) -> usize {
         self.width
     }
@@ -305,7 +364,17 @@ impl QrCode {
     /// Gets the number of modules per side, i.e. the height of this QR code.
     ///
     /// The height here does not contain the quiet zone paddings.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::QrCode;
+    /// #
+    /// let code = QrCode::new_rect_micro(b"Some data").unwrap();
+    /// assert_eq!(code.height(), 13);
+    /// ```
     #[must_use]
+    #[inline]
     pub const fn height(&self) -> usize {
         self.height
     }
@@ -314,7 +383,17 @@ impl QrCode {
     /// Gets the maximum number of allowed erratic modules can be introduced
     /// before the data becomes corrupted. Note that errors should not be
     /// introduced to functional modules.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::QrCode;
+    /// #
+    /// let code = QrCode::new(b"Some data").unwrap();
+    /// assert_eq!(code.max_allowed_errors(), 4);
+    /// ```
     #[must_use]
+    #[inline]
     pub fn max_allowed_errors(&self) -> usize {
         ec::max_allowed_errors(self.version, self.ec_level).expect("invalid version or ec_level")
     }
@@ -345,12 +424,14 @@ impl QrCode {
 
     /// Converts the QR code to a vector of colors.
     #[must_use]
+    #[inline]
     pub fn to_colors(&self) -> Vec<Color> {
         self.content.clone()
     }
 
     /// Converts the QR code to a vector of colors.
     #[must_use]
+    #[inline]
     pub fn into_colors(self) -> Vec<Color> {
         self.content
     }
@@ -364,23 +445,28 @@ impl QrCode {
     /// ```
     /// # #[cfg(feature = "image")]
     /// # {
-    /// # use qrcode2::QrCode;
-    /// # use image::Rgb;
-    ///
-    /// let image = QrCode::new(b"hello")
+    /// # use qrcode2::{
+    /// #     QrCode,
+    /// #     image::{Rgb, imageops},
+    /// # };
+    /// #
+    /// let mut image = QrCode::new(b"hello")
     ///     .unwrap()
-    ///     .render()
+    ///     .render::<Rgb<u8>>()
     ///     .dark_color(Rgb([0, 0, 128]))
     ///     .light_color(Rgb([224, 224, 224]))
     ///     .quiet_zone(false)
     ///     .min_dimensions(300, 300)
     ///     .build();
+    ///
+    /// // Flip the QR code vertically.
+    /// imageops::rotate180_in_place(&mut image);
+    /// let temp_dir = tempfile::tempdir().unwrap();
+    /// image.save(temp_dir.path().join("qrcode.png")).unwrap();
     /// # }
     /// ```
-    ///
-    /// Note: the `image` crate itself also provides method to rotate the image,
-    /// or overlay a logo on top of the QR code.
     #[must_use]
+    #[inline]
     pub fn render<P: Pixel>(&self) -> Renderer<'_, P> {
         let quiet_zone = if self.version.is_normal() { 4 } else { 2 };
         Renderer::new(&self.content, self.width, self.height, quiet_zone)
@@ -390,7 +476,8 @@ impl QrCode {
 impl Index<(usize, usize)> for QrCode {
     type Output = Color;
 
-    fn index(&self, (x, y): (usize, usize)) -> &Color {
+    #[inline]
+    fn index(&self, (x, y): (usize, usize)) -> &Self::Output {
         let index = y * self.width + x;
         &self.content[index]
     }
@@ -398,7 +485,7 @@ impl Index<(usize, usize)> for QrCode {
 
 #[cfg(test)]
 mod tests {
-    use crate::{EcLevel, QrCode, Version};
+    use super::*;
 
     #[test]
     fn test_annex_i_qr() {

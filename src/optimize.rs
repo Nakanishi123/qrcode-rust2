@@ -8,6 +8,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Find the optimal data mode sequence to encode a piece of data.
+
 use core::slice::Iter;
 
 use crate::types::{Mode, Version};
@@ -28,8 +29,8 @@ pub struct Segment {
 }
 
 impl Segment {
-    /// Compute the number of bits (including the size of the mode indicator and
-    /// length bits) when this segment is encoded.
+    /// Computes the number of bits (including the size of the mode indicator
+    /// and length bits) when this segment is encoded.
     #[must_use]
     pub fn encoded_len(&self, version: Version) -> usize {
         let byte_size = self.end - self.begin;
@@ -68,7 +69,7 @@ struct EcsIter<I> {
 impl<'a, I: Iterator<Item = &'a u8>> Iterator for EcsIter<I> {
     type Item = (usize, ExclCharSet);
 
-    fn next(&mut self) -> Option<(usize, ExclCharSet)> {
+    fn next(&mut self) -> Option<Self::Item> {
         if self.ended {
             return None;
         }
@@ -100,28 +101,30 @@ impl Parser<'_> {
     /// Creates a new iterator which parse the data into segments that only
     /// contains their exclusive subsets. No optimization is done at this point.
     ///
-    /// ```
-    /// use qrcode2::{
-    ///     optimize::{Parser, Segment},
-    ///     types::Mode::{Alphanumeric, Byte, Numeric},
-    /// };
+    /// # Examples
     ///
+    /// ```
+    /// # use qrcode2::{
+    /// #     optimize::{Parser, Segment},
+    /// #     types::Mode,
+    /// # };
+    /// #
     /// let parse_res = Parser::new(b"ABC123abcd").collect::<Vec<Segment>>();
     /// assert_eq!(
     ///     parse_res,
     ///     &[
     ///         Segment {
-    ///             mode: Alphanumeric,
+    ///             mode: Mode::Alphanumeric,
     ///             begin: 0,
     ///             end: 3
     ///         },
     ///         Segment {
-    ///             mode: Numeric,
+    ///             mode: Mode::Numeric,
     ///             begin: 3,
     ///             end: 6
     ///         },
     ///         Segment {
-    ///             mode: Byte,
+    ///             mode: Mode::Byte,
     ///             begin: 6,
     ///             end: 10
     ///         }
@@ -129,6 +132,7 @@ impl Parser<'_> {
     /// );
     /// ```
     #[must_use]
+    #[inline]
     pub fn new(data: &[u8]) -> Parser<'_> {
         Parser {
             ecs_iter: EcsIter {
@@ -146,7 +150,7 @@ impl Parser<'_> {
 impl Iterator for Parser<'_> {
     type Item = Segment;
 
-    fn next(&mut self) -> Option<Segment> {
+    fn next(&mut self) -> Option<Self::Item> {
         if self.pending_single_byte {
             self.pending_single_byte = false;
             self.begin += 1;
@@ -199,10 +203,7 @@ impl Iterator for Parser<'_> {
 mod parse_tests {
     use alloc::vec::Vec;
 
-    use crate::{
-        optimize::{Parser, Segment},
-        types::Mode,
-    };
+    use super::*;
 
     fn parse(data: &[u8]) -> Vec<Segment> {
         Parser::new(data).collect()
@@ -337,8 +338,8 @@ mod parse_tests {
 
     #[test]
     fn test_not_kanji_2() {
-        // Note that it's implementation detail that the byte seq is split into
-        // two. Perhaps adjust the test to check for this.
+        // Note that it's implementation detail that the byte seq is split into two.
+        // Perhaps adjust the test to check for this.
         let segs = parse(b"\xeb\xc0");
         assert_eq!(
             segs,
@@ -411,11 +412,12 @@ pub struct Optimizer<I> {
 }
 
 impl<I: Iterator<Item = Segment>> Optimizer<I> {
-    /// Optimize the segments by combining adjacent segments when possible.
+    /// Optimizes the segments by combining adjacent segments when possible.
     ///
     /// Currently this method uses a greedy algorithm by combining segments from
     /// left to right until the new segment is longer than before. This method
-    /// does *not* use Annex J from the ISO standard.
+    /// does _not_ use Annex J from the ISO standard.
+    #[inline]
     pub fn new(mut segments: I, version: Version) -> Self {
         match segments.next() {
             None => Self {
@@ -443,6 +445,7 @@ impl<I: Iterator<Item = Segment>> Optimizer<I> {
 impl Parser<'_> {
     /// Creates a new `Optimizer` based on this parser.
     #[must_use]
+    #[inline]
     pub fn optimize(self, version: Version) -> Optimizer<Self> {
         Optimizer::new(self, version)
     }
@@ -451,7 +454,7 @@ impl Parser<'_> {
 impl<I: Iterator<Item = Segment>> Iterator for Optimizer<I> {
     type Item = Segment;
 
-    fn next(&mut self) -> Option<Segment> {
+    fn next(&mut self) -> Option<Self::Item> {
         if self.ended {
             return None;
         }
@@ -489,6 +492,7 @@ impl<I: Iterator<Item = Segment>> Iterator for Optimizer<I> {
 
 /// Computes the total encoded length of all segments.
 #[must_use]
+#[inline]
 pub fn total_encoded_len(segments: &[Segment], version: Version) -> usize {
     segments.iter().map(|seg| seg.encoded_len(version)).sum()
 }
@@ -497,10 +501,7 @@ pub fn total_encoded_len(segments: &[Segment], version: Version) -> usize {
 mod optimize_tests {
     use alloc::vec::Vec;
 
-    use crate::{
-        optimize::{Optimizer, Segment, total_encoded_len},
-        types::{Mode, Version},
-    };
+    use super::*;
 
     fn test_optimization_result(given: &[Segment], expected: &[Segment], version: Version) {
         let prev_len = total_encoded_len(given, version);
@@ -776,7 +777,7 @@ mod optimize_tests {
 
 // Internal types and data for parsing
 
-/// All values of `u8` can be split into 9 different character sets when
+/// All values of [`u8`] can be split into 9 different character sets when
 /// determining which encoding to use. This enum represents these groupings for
 /// parsing purpose.
 #[derive(Clone, Copy)]

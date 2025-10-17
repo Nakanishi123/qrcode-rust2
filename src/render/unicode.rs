@@ -1,12 +1,25 @@
 // SPDX-FileCopyrightText: 2020 Vladimir Serov
+// SPDX-FileCopyrightText: 2025 Shun Sakai
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! UTF-8 rendering, with 2 pixels per symbol.
+//!
+//! # Examples
+//!
+//! ```
+//! use qrcode2::{QrCode, render::unicode::Dense1x2};
+//!
+//! let code = QrCode::new(b"Hello").unwrap();
+//! let s = code.render::<Dense1x2>().build();
+//! println!("{s}");
+//! ```
 
 use alloc::{string::String, vec, vec::Vec};
 
 use crate::render::{Canvas as RenderCanvas, Color, Pixel};
+#[cfg(test)]
+use crate::{EcLevel, QrCode, Version, render::Renderer};
 
 const CODEPAGE: [&str; 4] = [" ", "\u{2584}", "\u{2580}", "\u{2588}"];
 
@@ -15,6 +28,7 @@ const CODEPAGE: [&str; 4] = [" ", "\u{2584}", "\u{2580}", "\u{2588}"];
 pub enum Dense1x2 {
     /// The pixel is dark colored.
     Dark,
+
     /// The pixel is light colored.
     Light,
 }
@@ -22,9 +36,13 @@ pub enum Dense1x2 {
 impl Pixel for Dense1x2 {
     type Image = String;
     type Canvas = Canvas1x2;
+
+    #[inline]
     fn default_color(color: Color) -> Self {
         color.select(Self::Dark, Self::Light)
     }
+
+    #[inline]
     fn default_unit_size() -> (u32, u32) {
         (1, 1)
     }
@@ -37,6 +55,7 @@ impl Dense1x2 {
             Self::Light => 0,
         }
     }
+
     fn parse_2_bits(sym: u8) -> &'static str {
         CODEPAGE[usize::from(sym)]
     }
@@ -54,20 +73,22 @@ impl RenderCanvas for Canvas1x2 {
     type Pixel = Dense1x2;
     type Image = String;
 
-    fn new(width: u32, height: u32, dark_pixel: Dense1x2, light_pixel: Dense1x2) -> Self {
-        let a = vec![light_pixel.value(); (width * height) as usize];
+    fn new(width: u32, height: u32, dark_pixel: Self::Pixel, light_pixel: Self::Pixel) -> Self {
+        let canvas = vec![light_pixel.value(); (width * height) as usize];
+        let dark_pixel = dark_pixel.value();
         Self {
+            canvas,
             width,
-            canvas: a,
-            dark_pixel: dark_pixel.value(),
+            dark_pixel,
         }
     }
 
+    #[inline]
     fn draw_dark_pixel(&mut self, x: u32, y: u32) {
         self.canvas[(x + y * self.width) as usize] = self.dark_pixel;
     }
 
-    fn into_image(self) -> String {
+    fn into_image(self) -> Self::Image {
         self.canvas
             // Chopping array into 1-line sized fragments
             .chunks_exact(self.width as usize)
@@ -100,7 +121,6 @@ impl RenderCanvas for Canvas1x2 {
 
 #[test]
 fn test_render_to_utf8_string() {
-    use crate::render::Renderer;
     let colors = &[Color::Dark, Color::Light, Color::Light, Color::Dark];
     let image: String = Renderer::<Dense1x2>::new(colors, 2, 2, 1).build();
 
@@ -115,8 +135,6 @@ fn test_render_to_utf8_string() {
 
 #[test]
 fn integration_render_utf8_1x2() {
-    use crate::{EcLevel, QrCode, Version, render::unicode::Dense1x2};
-
     let code = QrCode::with_version(b"09876542", Version::Micro(2), EcLevel::L).unwrap();
     let image = code.render::<Dense1x2>().module_dimensions(1, 1).build();
     assert_eq!(
@@ -136,8 +154,6 @@ fn integration_render_utf8_1x2() {
 
 #[test]
 fn integration_render_utf8_1x2_inverted() {
-    use crate::{EcLevel, QrCode, Version, render::unicode::Dense1x2};
-
     let code = QrCode::with_version(b"12345678", Version::Micro(2), EcLevel::L).unwrap();
     let image = code
         .render::<Dense1x2>()

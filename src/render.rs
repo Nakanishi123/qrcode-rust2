@@ -8,16 +8,20 @@
 
 //! Render a QR code into image.
 
-use core::cmp::max;
-
-use crate::{cast::As, types::Color};
-
+#[cfg(feature = "eps")]
 pub mod eps;
+#[cfg(feature = "image")]
 pub mod image;
+#[cfg(feature = "pic")]
 pub mod pic;
 pub mod string;
+#[cfg(feature = "svg")]
 pub mod svg;
 pub mod unicode;
+
+use core::cmp;
+
+use crate::{cast::As, types::Color};
 
 // Pixel trait
 
@@ -27,7 +31,7 @@ pub trait Pixel: Copy + Sized {
     type Image: Sized + 'static;
 
     /// The type that stores an intermediate buffer before finalizing to a
-    /// concrete image
+    /// concrete image.
     type Canvas: Canvas<Pixel = Self, Image = Self::Image>;
 
     /// Obtains the default module size. The result must be at least 1×1.
@@ -64,7 +68,7 @@ pub trait Canvas: Sized {
         }
     }
 
-    /// Finalize the canvas to a real image.
+    /// Finalizes the canvas to a real image.
     fn into_image(self) -> Self::Image;
 }
 
@@ -81,7 +85,6 @@ pub struct Renderer<'a, P: Pixel> {
     vertical_modules_count: u32,
     quiet_zone: u32,
     module_size: (u32, u32),
-
     dark_color: P,
     light_color: P,
     has_quiet_zone: bool,
@@ -105,39 +108,48 @@ impl<'a, P: Pixel> Renderer<'a, P> {
         quiet_zone: u32,
     ) -> Self {
         assert!(horizontal_modules_count * vertical_modules_count == content.len());
-        Renderer {
+        let horizontal_modules_count = horizontal_modules_count.as_u32();
+        let vertical_modules_count = vertical_modules_count.as_u32();
+        let module_size = P::default_unit_size();
+        let dark_color = P::default_color(Color::Dark);
+        let light_color = P::default_color(Color::Light);
+        Self {
             content,
-            horizontal_modules_count: horizontal_modules_count.as_u32(),
-            vertical_modules_count: vertical_modules_count.as_u32(),
+            horizontal_modules_count,
+            vertical_modules_count,
             quiet_zone,
-            module_size: P::default_unit_size(),
-            dark_color: P::default_color(Color::Dark),
-            light_color: P::default_color(Color::Light),
+            module_size,
+            dark_color,
+            light_color,
             has_quiet_zone: true,
         }
     }
 
     /// Sets color of a dark module. Default is opaque black.
+    #[inline]
     pub const fn dark_color(&mut self, color: P) -> &mut Self {
         self.dark_color = color;
         self
     }
 
     /// Sets color of a light module. Default is opaque white.
+    #[inline]
     pub const fn light_color(&mut self, color: P) -> &mut Self {
         self.light_color = color;
         self
     }
 
-    /// Whether to include the quiet zone in the generated image.
+    /// Sets whether to include the quiet zone in the generated image.
+    #[inline]
     pub const fn quiet_zone(&mut self, has_quiet_zone: bool) -> &mut Self {
         self.has_quiet_zone = has_quiet_zone;
         self
     }
 
     /// Sets the size of each module in pixels. Default is 8×8.
+    #[inline]
     pub fn module_dimensions(&mut self, width: u32, height: u32) -> &mut Self {
-        self.module_size = (max(width, 1), max(height, 1));
+        self.module_size = (cmp::max(width, 1), cmp::max(height, 1));
         self
     }
 

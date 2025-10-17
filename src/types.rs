@@ -9,12 +9,7 @@
 //! The `types` module contains types associated with the functional elements of
 //! a QR code.
 
-use core::{
-    cmp::{Ordering, PartialOrd},
-    default::Default,
-    fmt::{Display, Error, Formatter},
-    ops::Not,
-};
+use core::{cmp::Ordering, error::Error, fmt, ops::Not};
 
 use crate::cast::As;
 
@@ -34,28 +29,27 @@ pub enum QrError {
     UnsupportedCharacterSet,
 
     /// The provided ECI designator is invalid. A valid designator should be
-    /// between 0 and 999999.
+    /// between 0 and 999,999.
     InvalidEciDesignator,
 
     /// A character not belonging to the character set is found.
     InvalidCharacter,
 }
 
-impl Display for QrError {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> Result<(), Error> {
-        let msg = match *self {
-            Self::DataTooLong => "data too long",
-            Self::InvalidVersion => "invalid version",
-            Self::UnsupportedCharacterSet => "unsupported character set",
-            Self::InvalidEciDesignator => "invalid ECI designator",
-            Self::InvalidCharacter => "invalid character",
-        };
-        fmt.write_str(msg)
+impl fmt::Display for QrError {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::DataTooLong => write!(f, "data too long"),
+            Self::InvalidVersion => write!(f, "invalid version"),
+            Self::UnsupportedCharacterSet => write!(f, "unsupported character set"),
+            Self::InvalidEciDesignator => write!(f, "invalid ECI designator"),
+            Self::InvalidCharacter => write!(f, "invalid character"),
+        }
     }
 }
 
-#[cfg(feature = "std")]
-impl ::std::error::Error for QrError {}
+impl Error for QrError {}
 
 /// `QrResult` is a convenient alias for a QR code generation result.
 pub type QrResult<T> = Result<T, QrError>;
@@ -67,21 +61,24 @@ pub type QrResult<T> = Result<T, QrError>;
 pub enum Color {
     /// The module is light colored.
     Light,
+
     /// The module is dark colored.
     Dark,
 }
 
 impl Color {
-    /// Selects a value according to color of the module. Equivalent to
-    /// `if self != Color::Light { dark } else { light }`.
+    /// Selects a value according to color of the module. Equivalent to `if self
+    /// != Color::Light { dark } else { light }`.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use qrcode2::types::Color;
+    /// # use qrcode2::Color;
+    /// #
     /// assert_eq!(Color::Light.select(1, 0), 0);
     /// assert_eq!(Color::Dark.select("black", "white"), "black");
     /// ```
+    #[inline]
     pub fn select<T>(self, dark: T, light: T) -> T {
         match self {
             Self::Light => light,
@@ -92,7 +89,9 @@ impl Color {
 
 impl Not for Color {
     type Output = Self;
-    fn not(self) -> Self {
+
+    #[inline]
+    fn not(self) -> Self::Output {
         match self {
             Self::Light => Self::Dark,
             Self::Dark => Self::Light,
@@ -124,21 +123,25 @@ pub enum EcLevel {
 /// In QR code terminology, `Version` means the size of the generated image.
 /// Larger version means the size of code is larger, and therefore can carry
 /// more information.
-///
-/// The smallest version is `Version::Normal(1)` of size 21×21, and the largest
-/// is `Version::Normal(40)` of size 177×177.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Version {
-    /// A normal QR code version. The parameter should be between 1 and 40.
+    /// A normal QR code version. The parameter should be between 1 and 40. The
+    /// smallest version is `Version::Normal(1)` of size 21×21, and the largest
+    /// is `Version::Normal(40)` of size 177×177.
     Normal(i16),
 
-    /// A Micro QR code version. The parameter should be between 1 and 4.
+    /// A Micro QR code version. The parameter should be between 1 and 4. The
+    /// smallest version is `Version::Micro(1)` of size 11×11, and the largest
+    /// is `Version::Micro(4)` of size 17×17.
     Micro(i16),
 
     /// A rMQR code version. The first parameter represents the height and
     /// should be 7, 9, 11, 13, 15, or 17. The second parameter represents the
     /// width and should be 27, 43, 59, 77, 99, or 139. 27 can only be used with
-    /// 11, or 13.
+    /// 11, or 13. The smallest versions are `Version::RectMicro(7, 43)` of size
+    /// 7×43 when the height is minimum and `Version::RectMicro(11, 27)` of size
+    /// 11×27 when the width is minimum, and the largest is
+    /// `Version::RectMicro(17, 139)` of size 17×139.
     RectMicro(i16, i16),
 }
 
@@ -147,7 +150,18 @@ impl Version {
     /// QR code, i.e. the width of the code.
     ///
     /// Except for rMQR code, the width is the same as the height.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::Version;
+    /// #
+    /// assert_eq!(Version::Normal(40).width(), 177);
+    /// assert_eq!(Version::Micro(4).width(), 17);
+    /// assert_eq!(Version::RectMicro(17, 139).width(), 139);
+    /// ```
     #[must_use]
+    #[inline]
     pub const fn width(self) -> i16 {
         match self {
             Self::Normal(v) => v * 4 + 17,
@@ -160,7 +174,18 @@ impl Version {
     /// code, i.e. the height of the code.
     ///
     /// Except for rMQR code, the height is the same as the width.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::Version;
+    /// #
+    /// assert_eq!(Version::Normal(40).height(), 177);
+    /// assert_eq!(Version::Micro(4).height(), 17);
+    /// assert_eq!(Version::RectMicro(17, 139).height(), 17);
+    /// ```
     #[must_use]
+    #[inline]
     pub const fn height(self) -> i16 {
         if let Self::RectMicro(h, _) = self {
             h
@@ -179,11 +204,10 @@ impl Version {
     ///
     /// # Errors
     ///
-    /// If the entry compares equal to the default value of `T`, this method
-    /// returns `Err(QrError::InvalidVersion)`.
+    /// Returns [`Err`] if the entry compares equal to the default value of `T`.
     pub fn fetch<T>(self, ec_level: EcLevel, table: &[[T; 4]]) -> QrResult<T>
     where
-        T: PartialEq + Default + Copy,
+        T: Copy + Default + PartialEq,
     {
         match self {
             Self::Normal(v @ 1..=40) => {
@@ -207,8 +231,19 @@ impl Version {
         Err(QrError::InvalidVersion)
     }
 
-    /// The number of bits needed to encode the mode indicator.
+    /// Returns the number of bits needed to encode the mode indicator.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::Version;
+    /// #
+    /// assert_eq!(Version::Normal(40).mode_bits_count(), 4);
+    /// assert_eq!(Version::Micro(4).mode_bits_count(), 3);
+    /// assert_eq!(Version::RectMicro(17, 139).mode_bits_count(), 3);
+    /// ```
     #[must_use]
+    #[inline]
     pub fn mode_bits_count(self) -> usize {
         match self {
             Self::Normal(_) => 4,
@@ -218,19 +253,64 @@ impl Version {
     }
 
     /// Checks whether is version refers to a normal QR code.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::Version;
+    /// #
+    /// assert_eq!(Version::Normal(1).is_normal(), true);
+    /// assert_eq!(Version::Normal(40).is_normal(), true);
+    /// // Invalid normal QR code version.
+    /// assert_eq!(Version::Normal(0).is_normal(), false);
+    ///
+    /// assert_eq!(Version::Micro(1).is_normal(), false);
+    /// assert_eq!(Version::RectMicro(7, 43).is_normal(), false);
+    /// ```
     #[must_use]
+    #[inline]
     pub const fn is_normal(self) -> bool {
         matches!(self, Self::Normal(version) if version >= 1 && version <= 40)
     }
 
     /// Checks whether is version refers to a Micro QR code.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::Version;
+    /// #
+    /// assert_eq!(Version::Micro(1).is_micro(), true);
+    /// assert_eq!(Version::Micro(4).is_micro(), true);
+    /// // Invalid Micro QR code version.
+    /// assert_eq!(Version::Micro(0).is_micro(), false);
+    ///
+    /// assert_eq!(Version::Normal(1).is_micro(), false);
+    /// assert_eq!(Version::RectMicro(7, 43).is_micro(), false);
+    /// ```
     #[must_use]
+    #[inline]
     pub const fn is_micro(self) -> bool {
         matches!(self, Self::Micro(version) if version >= 1 && version <= 4)
     }
 
     /// Checks whether is version refers to a rMQR code.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::Version;
+    /// #
+    /// assert_eq!(Version::RectMicro(7, 43).is_rect_micro(), true);
+    /// assert_eq!(Version::RectMicro(17, 139).is_rect_micro(), true);
+    /// // Invalid rMQR code version.
+    /// assert_eq!(Version::RectMicro(0, 0).is_rect_micro(), false);
+    ///
+    /// assert_eq!(Version::Normal(1).is_rect_micro(), false);
+    /// assert_eq!(Version::Micro(1).is_rect_micro(), false);
+    /// ```
     #[must_use]
+    #[inline]
     pub const fn is_rect_micro(self) -> bool {
         self.rect_micro_index().is_ok()
     }
@@ -296,7 +376,41 @@ impl Version {
 
 #[cfg(test)]
 mod version_tests {
-    use crate::types::Version;
+    use super::*;
+
+    #[test]
+    fn test_width() {
+        assert_eq!(Version::Normal(1).width(), 21);
+        assert_eq!(Version::Normal(40).width(), 177);
+        assert_eq!(Version::Micro(1).width(), 11);
+        assert_eq!(Version::Micro(4).width(), 17);
+        assert_eq!(Version::RectMicro(7, 43).width(), 43);
+        assert_eq!(Version::RectMicro(11, 27).width(), 27);
+        assert_eq!(Version::RectMicro(17, 139).width(), 139);
+    }
+
+    #[test]
+    fn test_height() {
+        assert_eq!(Version::Normal(1).height(), 21);
+        assert_eq!(Version::Normal(40).height(), 177);
+        assert_eq!(Version::Micro(1).height(), 11);
+        assert_eq!(Version::Micro(4).height(), 17);
+        assert_eq!(Version::RectMicro(7, 43).height(), 7);
+        assert_eq!(Version::RectMicro(11, 27).height(), 11);
+        assert_eq!(Version::RectMicro(17, 139).height(), 17);
+    }
+
+    #[test]
+    fn test_mode_bits_count() {
+        assert_eq!(Version::Normal(1).mode_bits_count(), 4);
+        for version in 1..=4 {
+            assert_eq!(
+                Version::Micro(version).mode_bits_count(),
+                (version - 1).as_usize()
+            );
+        }
+        assert_eq!(Version::RectMicro(7, 43).mode_bits_count(), 3);
+    }
 
     #[test]
     fn test_is_normal() {
@@ -361,14 +475,17 @@ pub enum Mode {
 impl Mode {
     /// Computes the number of bits needed to encode the data length.
     ///
-    /// ```
-    /// use qrcode2::types::{Mode, Version};
+    /// # Errors
     ///
+    /// Returns [`Err`] if the mode is not supported in the given version.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::{Version, types::Mode};
+    /// #
     /// assert_eq!(Mode::Numeric.length_bits_count(Version::Normal(1)), 10);
     /// ```
-    ///
-    /// This method will return `Err(QrError::UnsupportedCharacterSet)` if the
-    /// mode is not supported in the given version.
     #[must_use]
     pub fn length_bits_count(self, version: Version) -> usize {
         match version {
@@ -411,15 +528,22 @@ impl Mode {
 
     /// Computes the number of bits needed to some data of a given raw length.
     ///
-    /// ```
-    /// use qrcode2::types::Mode;
-    ///
-    /// assert_eq!(Mode::Numeric.data_bits_count(7), 24);
-    /// ```
+    /// <div class="warning">
     ///
     /// Note that in Kanji mode, the `raw_data_len` is the number of Kanjis,
     /// i.e. half the total size of bytes.
+    ///
+    /// </div>
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use qrcode2::types::Mode;
+    /// #
+    /// assert_eq!(Mode::Numeric.data_bits_count(7), 24);
+    /// ```
     #[must_use]
+    #[inline]
     pub const fn data_bits_count(self, raw_data_len: usize) -> usize {
         match self {
             Self::Numeric => (raw_data_len * 10).div_ceil(3),
@@ -429,11 +553,13 @@ impl Mode {
         }
     }
 
-    /// Find the lowest common mode which both modes are compatible with.
+    /// Finds the lowest common mode which both modes are compatible with.
+    ///
+    /// # Examples
     ///
     /// ```
-    /// use qrcode2::types::Mode;
-    ///
+    /// # use qrcode2::types::Mode;
+    /// #
     /// let a = Mode::Numeric;
     /// let b = Mode::Kanji;
     /// let c = a.max(b);
@@ -441,6 +567,7 @@ impl Mode {
     /// assert!(b <= c);
     /// ```
     #[must_use]
+    #[inline]
     pub fn max(self, other: Self) -> Self {
         match self.partial_cmp(&other) {
             Some(Ordering::Greater) => self,
@@ -451,8 +578,9 @@ impl Mode {
 }
 
 impl PartialOrd for Mode {
-    /// Defines a partial ordering between modes. If `a <= b`, then `b` contains
-    /// a superset of all characters supported by `a`.
+    /// Defines a partial ordering between modes. If `self <= other`, then
+    /// `other` contains a superset of all characters supported by `self`.
+    #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (*self, *other) {
             (a, b) if a == b => Some(Ordering::Equal),
@@ -465,25 +593,28 @@ impl PartialOrd for Mode {
 
 #[cfg(test)]
 mod mode_tests {
-    use crate::types::Mode::{Alphanumeric, Byte, Kanji, Numeric};
+    use super::*;
 
     #[test]
     fn test_mode_order() {
-        assert!(Numeric < Alphanumeric);
-        assert!(Byte > Kanji);
-        assert!(!(Numeric < Kanji));
-        assert!(!(Numeric >= Kanji));
+        assert!(Mode::Numeric < Mode::Alphanumeric);
+        assert!(Mode::Byte > Mode::Kanji);
+        assert!(!(Mode::Numeric < Mode::Kanji));
+        assert!(!(Mode::Numeric >= Mode::Kanji));
     }
 
     #[test]
     fn test_max() {
-        assert_eq!(Byte.max(Kanji), Byte);
-        assert_eq!(Numeric.max(Alphanumeric), Alphanumeric);
-        assert_eq!(Alphanumeric.max(Alphanumeric), Alphanumeric);
-        assert_eq!(Numeric.max(Kanji), Byte);
-        assert_eq!(Kanji.max(Numeric), Byte);
-        assert_eq!(Alphanumeric.max(Numeric), Alphanumeric);
-        assert_eq!(Kanji.max(Kanji), Kanji);
+        assert_eq!(Mode::Byte.max(Mode::Kanji), Mode::Byte);
+        assert_eq!(Mode::Numeric.max(Mode::Alphanumeric), Mode::Alphanumeric);
+        assert_eq!(
+            Mode::Alphanumeric.max(Mode::Alphanumeric),
+            Mode::Alphanumeric
+        );
+        assert_eq!(Mode::Numeric.max(Mode::Kanji), Mode::Byte);
+        assert_eq!(Mode::Kanji.max(Mode::Numeric), Mode::Byte);
+        assert_eq!(Mode::Alphanumeric.max(Mode::Numeric), Mode::Alphanumeric);
+        assert_eq!(Mode::Kanji.max(Mode::Kanji), Mode::Kanji);
     }
 }
 
