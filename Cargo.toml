@@ -35,19 +35,16 @@ name = "encode_pic"
 required-features = ["pic"]
 
 [[example]]
-name = "encode_string"
-
-[[example]]
 name = "encode_svg"
 required-features = ["svg"]
-
-[[example]]
-name = "encode_unicode"
 
 [dependencies]
 image = { version = "0.25.8", default-features = false, optional = true }
 
 [dev-dependencies]
+anyhow = "1.0.100"
+clap = { version = "4.5.49", features = ["derive"] }
+csscolorparser = "0.7.2"
 image = "0.25.8"
 tempfile = "3.23.0"
 
