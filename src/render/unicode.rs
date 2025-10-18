@@ -124,13 +124,16 @@ fn test_render_to_utf8_string() {
     let colors = &[Color::Dark, Color::Light, Color::Light, Color::Dark];
     let image: String = Renderer::<Dense1x2>::new(colors, 2, 2, 1).build();
 
-    assert_eq!(&image, " ▄  \n  ▀ ");
+    assert_eq!(&image, concat!(" ▄  \n", "  ▀ "));
 
     let image2 = Renderer::<Dense1x2>::new(colors, 2, 2, 1)
         .module_dimensions(2, 2)
         .build();
 
-    assert_eq!(&image2, "        \n  ██    \n    ██  \n        ");
+    assert_eq!(
+        &image2,
+        concat!("        \n", "  ██    \n", "    ██  \n", "        ")
+    );
 }
 
 #[test]
@@ -139,16 +142,17 @@ fn integration_render_utf8_1x2() {
     let image = code.render::<Dense1x2>().module_dimensions(1, 1).build();
     assert_eq!(
         image,
-        String::new()
-            + "                 \n"
-            + "  █▀▀▀▀▀█ ▀ █ ▀  \n"
-            + "  █ ███ █  ▀ █   \n"
-            + "  █ ▀▀▀ █  ▀█ █  \n"
-            + "  ▀▀▀▀▀▀▀ ▄▀▀ █  \n"
-            + "  ▀█ ▀▀▀▀▀██▀▀▄  \n"
-            + "  ▀███▄ ▀▀ █ ██  \n"
-            + "  ▀▀▀ ▀ ▀▀ ▀  ▀  \n"
-            + "                 "
+        concat!(
+            "                 \n",
+            "  █▀▀▀▀▀█ ▀ █ ▀  \n",
+            "  █ ███ █  ▀ █   \n",
+            "  █ ▀▀▀ █  ▀█ █  \n",
+            "  ▀▀▀▀▀▀▀ ▄▀▀ █  \n",
+            "  ▀█ ▀▀▀▀▀██▀▀▄  \n",
+            "  ▀███▄ ▀▀ █ ██  \n",
+            "  ▀▀▀ ▀ ▀▀ ▀  ▀  \n",
+            "                 "
+        )
     );
 }
 
@@ -163,14 +167,16 @@ fn integration_render_utf8_1x2_inverted() {
         .build();
     assert_eq!(
         image,
-        "█████████████████\n\
-         ██ ▄▄▄▄▄ █▄▀▄█▄██\n\
-         ██ █   █ █   █ ██\n\
-         ██ █▄▄▄█ █▄▄██▀██\n\
-         ██▄▄▄▄▄▄▄█▄▄▄▀ ██\n\
-         ██▄ ▀ ▀ ▀▄▄  ████\n\
-         ██▄▄▀▄█ ▀▀▀ ▀▄▄██\n\
-         ██▄▄▄█▄▄█▄██▄█▄██\n\
-         ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀"
+        concat!(
+            "█████████████████\n",
+            "██ ▄▄▄▄▄ █▄▀▄█▄██\n",
+            "██ █   █ █   █ ██\n",
+            "██ █▄▄▄█ █▄▄██▀██\n",
+            "██▄▄▄▄▄▄▄█▄▄▄▀ ██\n",
+            "██▄ ▀ ▀ ▀▄▄  ████\n",
+            "██▄▄▀▄█ ▀▀▀ ▀▄▄██\n",
+            "██▄▄▄█▄▄█▄██▄█▄██\n",
+            "▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀"
+        )
     );
 }

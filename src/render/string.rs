@@ -142,7 +142,10 @@ fn test_render_to_string() {
 
     let colors = &[Color::Dark, Color::Light, Color::Light, Color::Dark];
     let image: String = Renderer::<char>::new(colors, 2, 2, 1).build();
-    assert_eq!(&image, "    \n \u{2588}  \n  \u{2588} \n    ");
+    assert_eq!(
+        &image,
+        concat!("    \n", " \u{2588}  \n", "  \u{2588} \n", "    ")
+    );
 
     let image2 = Renderer::new(colors, 2, 2, 1)
         .light_color("A")
@@ -152,13 +155,15 @@ fn test_render_to_string() {
 
     assert_eq!(
         &image2,
-        "AAAAAAAA\n\
-         AAAAAAAA\n\
-         AA!B!!B!AAAA\n\
-         AA!B!!B!AAAA\n\
-         AAAA!B!!B!AA\n\
-         AAAA!B!!B!AA\n\
-         AAAAAAAA\n\
-         AAAAAAAA"
+        concat!(
+            "AAAAAAAA\n",
+            "AAAAAAAA\n",
+            "AA!B!!B!AAAA\n",
+            "AA!B!!B!AAAA\n",
+            "AAAA!B!!B!AA\n",
+            "AAAA!B!!B!AA\n",
+            "AAAAAAAA\n",
+            "AAAAAAAA"
+        )
     );
 }
