@@ -216,50 +216,55 @@ impl Bits {
     }
 }
 
-#[test]
-fn test_push_number() {
-    let mut bits = Bits::new(Version::Normal(1));
+#[cfg(test)]
+mod push_number_tests {
+    use super::*;
 
-    // 0:0 .. 0:3
-    bits.push_number(3, 0b010);
-    // 0:3 .. 0:6
-    bits.push_number(3, 0b110);
-    // 0:6 .. 1:1
-    bits.push_number(3, 0b101);
-    // 1:1 .. 2:0
-    bits.push_number(7, 0b001_1010);
-    // 2:0 .. 2:4
-    bits.push_number(4, 0b1100);
-    // 2:4 .. 4:0
-    bits.push_number(12, 0b1011_0110_1101);
-    // 4:0 .. 5:2
-    bits.push_number(10, 0b01_1001_0001);
-    // 5:2 .. 7:1
-    bits.push_number(15, 0b111_0010_1110_0011);
+    #[test]
+    fn test_push_number() {
+        let mut bits = Bits::new(Version::Normal(1));
 
-    let bytes = bits.into_bytes();
+        // 0:0 .. 0:3
+        bits.push_number(3, 0b010);
+        // 0:3 .. 0:6
+        bits.push_number(3, 0b110);
+        // 0:6 .. 1:1
+        bits.push_number(3, 0b101);
+        // 1:1 .. 2:0
+        bits.push_number(7, 0b001_1010);
+        // 2:0 .. 2:4
+        bits.push_number(4, 0b1100);
+        // 2:4 .. 4:0
+        bits.push_number(12, 0b1011_0110_1101);
+        // 4:0 .. 5:2
+        bits.push_number(10, 0b01_1001_0001);
+        // 5:2 .. 7:1
+        bits.push_number(15, 0b111_0010_1110_0011);
 
-    assert_eq!(
-        bytes,
-        [
-            // 90
-            0b0101_1010,
-            // 154
-            0b1001_1010,
-            // 203
-            0b1100_1011,
-            // 109
-            0b0110_1101,
-            // 100
-            0b0110_0100,
-            // 121
-            0b0111_1001,
-            // 113
-            0b0111_0001,
-            // 128
-            0b1000_0000,
-        ]
-    );
+        let bytes = bits.into_bytes();
+
+        assert_eq!(
+            bytes,
+            [
+                // 90
+                0b0101_1010,
+                // 154
+                0b1001_1010,
+                // 203
+                0b1100_1011,
+                // 109
+                0b0110_1101,
+                // 100
+                0b0110_0100,
+                // 121
+                0b0111_1001,
+                // 113
+                0b0111_0001,
+                // 128
+                0b1000_0000,
+            ]
+        );
+    }
 }
 
 // Mode indicator

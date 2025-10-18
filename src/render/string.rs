@@ -136,34 +136,38 @@ impl<P: Element> RenderCanvas for Canvas<P> {
     }
 }
 
-#[test]
-fn test_render_to_string() {
+#[cfg(test)]
+mod tests {
+    use super::*;
     use crate::render::Renderer;
 
-    let colors = &[Color::Dark, Color::Light, Color::Light, Color::Dark];
-    let image: String = Renderer::<char>::new(colors, 2, 2, 1).build();
-    assert_eq!(
-        &image,
-        concat!("    \n", " \u{2588}  \n", "  \u{2588} \n", "    ")
-    );
+    #[test]
+    fn test_render_to_string() {
+        let colors = &[Color::Dark, Color::Light, Color::Light, Color::Dark];
+        let image: String = Renderer::<char>::new(colors, 2, 2, 1).build();
+        assert_eq!(
+            &image,
+            concat!("    \n", " \u{2588}  \n", "  \u{2588} \n", "    ")
+        );
 
-    let image2 = Renderer::new(colors, 2, 2, 1)
-        .light_color("A")
-        .dark_color("!B!")
-        .module_dimensions(2, 2)
-        .build();
+        let image2 = Renderer::new(colors, 2, 2, 1)
+            .light_color("A")
+            .dark_color("!B!")
+            .module_dimensions(2, 2)
+            .build();
 
-    assert_eq!(
-        &image2,
-        concat!(
-            "AAAAAAAA\n",
-            "AAAAAAAA\n",
-            "AA!B!!B!AAAA\n",
-            "AA!B!!B!AAAA\n",
-            "AAAA!B!!B!AA\n",
-            "AAAA!B!!B!AA\n",
-            "AAAAAAAA\n",
-            "AAAAAAAA"
-        )
-    );
+        assert_eq!(
+            &image2,
+            concat!(
+                "AAAAAAAA\n",
+                "AAAAAAAA\n",
+                "AA!B!!B!AAAA\n",
+                "AA!B!!B!AAAA\n",
+                "AAAA!B!!B!AA\n",
+                "AAAA!B!!B!AA\n",
+                "AAAAAAAA\n",
+                "AAAAAAAA"
+            )
+        );
+    }
 }

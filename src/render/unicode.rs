@@ -18,8 +18,6 @@
 use alloc::{string::String, vec, vec::Vec};
 
 use crate::render::{Canvas as RenderCanvas, Color, Pixel};
-#[cfg(test)]
-use crate::{EcLevel, QrCode, Version, render::Renderer};
 
 const CODEPAGE: [&str; 4] = [" ", "\u{2584}", "\u{2580}", "\u{2588}"];
 
@@ -119,64 +117,70 @@ impl RenderCanvas for Canvas1x2 {
     }
 }
 
-#[test]
-fn test_render_to_utf8_string() {
-    let colors = &[Color::Dark, Color::Light, Color::Light, Color::Dark];
-    let image: String = Renderer::<Dense1x2>::new(colors, 2, 2, 1).build();
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{EcLevel, QrCode, Version, render::Renderer};
 
-    assert_eq!(&image, concat!(" ▄  \n", "  ▀ "));
+    #[test]
+    fn test_render_to_utf8_string() {
+        let colors = &[Color::Dark, Color::Light, Color::Light, Color::Dark];
+        let image: String = Renderer::<Dense1x2>::new(colors, 2, 2, 1).build();
 
-    let image2 = Renderer::<Dense1x2>::new(colors, 2, 2, 1)
-        .module_dimensions(2, 2)
-        .build();
+        assert_eq!(&image, concat!(" ▄  \n", "  ▀ "));
 
-    assert_eq!(
-        &image2,
-        concat!("        \n", "  ██    \n", "    ██  \n", "        ")
-    );
-}
+        let image2 = Renderer::<Dense1x2>::new(colors, 2, 2, 1)
+            .module_dimensions(2, 2)
+            .build();
 
-#[test]
-fn integration_render_utf8_1x2() {
-    let code = QrCode::with_version(b"09876542", Version::Micro(2), EcLevel::L).unwrap();
-    let image = code.render::<Dense1x2>().module_dimensions(1, 1).build();
-    assert_eq!(
-        image,
-        concat!(
-            "                 \n",
-            "  █▀▀▀▀▀█ ▀ █ ▀  \n",
-            "  █ ███ █  ▀ █   \n",
-            "  █ ▀▀▀ █  ▀█ █  \n",
-            "  ▀▀▀▀▀▀▀ ▄▀▀ █  \n",
-            "  ▀█ ▀▀▀▀▀██▀▀▄  \n",
-            "  ▀███▄ ▀▀ █ ██  \n",
-            "  ▀▀▀ ▀ ▀▀ ▀  ▀  \n",
-            "                 "
-        )
-    );
-}
+        assert_eq!(
+            &image2,
+            concat!("        \n", "  ██    \n", "    ██  \n", "        ")
+        );
+    }
 
-#[test]
-fn integration_render_utf8_1x2_inverted() {
-    let code = QrCode::with_version(b"12345678", Version::Micro(2), EcLevel::L).unwrap();
-    let image = code
-        .render::<Dense1x2>()
-        .dark_color(Dense1x2::Light)
-        .light_color(Dense1x2::Dark)
-        .module_dimensions(1, 1)
-        .build();
-    assert_eq!(
-        image,
-        concat!(
-            "█████████████████\n",
-            "██ ▄▄▄▄▄ █▄▀▄█▄██\n",
-            "██ █   █ █   █ ██\n",
-            "██ █▄▄▄█ █▄▄██▀██\n",
-            "██▄▄▄▄▄▄▄█▄▄▄▀ ██\n",
-            "██▄ ▀ ▀ ▀▄▄  ████\n",
-            "██▄▄▀▄█ ▀▀▀ ▀▄▄██\n",
-            "██▄▄▄█▄▄█▄██▄█▄██\n",
-            "▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀"
-        )
-    );
+    #[test]
+    fn integration_render_utf8_1x2() {
+        let code = QrCode::with_version(b"09876542", Version::Micro(2), EcLevel::L).unwrap();
+        let image = code.render::<Dense1x2>().module_dimensions(1, 1).build();
+        assert_eq!(
+            image,
+            concat!(
+                "                 \n",
+                "  █▀▀▀▀▀█ ▀ █ ▀  \n",
+                "  █ ███ █  ▀ █   \n",
+                "  █ ▀▀▀ █  ▀█ █  \n",
+                "  ▀▀▀▀▀▀▀ ▄▀▀ █  \n",
+                "  ▀█ ▀▀▀▀▀██▀▀▄  \n",
+                "  ▀███▄ ▀▀ █ ██  \n",
+                "  ▀▀▀ ▀ ▀▀ ▀  ▀  \n",
+                "                 "
+            )
+        );
+    }
+
+    #[test]
+    fn integration_render_utf8_1x2_inverted() {
+        let code = QrCode::with_version(b"12345678", Version::Micro(2), EcLevel::L).unwrap();
+        let image = code
+            .render::<Dense1x2>()
+            .dark_color(Dense1x2::Light)
+            .light_color(Dense1x2::Dark)
+            .module_dimensions(1, 1)
+            .build();
+        assert_eq!(
+            image,
+            concat!(
+                "█████████████████\n",
+                "██ ▄▄▄▄▄ █▄▀▄█▄██\n",
+                "██ █   █ █   █ ██\n",
+                "██ █▄▄▄█ █▄▄██▀██\n",
+                "██▄▄▄▄▄▄▄█▄▄▄▀ ██\n",
+                "██▄ ▀ ▀ ▀▄▄  ████\n",
+                "██▄▄▀▄█ ▀▀▀ ▀▄▄██\n",
+                "██▄▄▄█▄▄█▄██▄█▄██\n",
+                "▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀"
+            )
+        );
+    }
 }

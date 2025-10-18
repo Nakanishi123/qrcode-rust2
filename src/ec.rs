@@ -94,10 +94,15 @@ fn interleave<T: Copy, V: Deref<Target = [T]>>(blocks: &[V]) -> Vec<T> {
     res
 }
 
-#[test]
-fn test_interleave() {
-    let res = interleave(&[&b"1234"[..], b"5678", b"abcdef", b"ghijkl"]);
-    assert_eq!(&*res, b"15ag26bh37ci48djekfl");
+#[cfg(test)]
+mod interleave_tests {
+    use super::*;
+
+    #[test]
+    fn test_interleave() {
+        let res = interleave(&[&b"1234"[..], b"5678", b"abcdef", b"ghijkl"]);
+        assert_eq!(&*res, b"15ag26bh37ci48djekfl");
+    }
 }
 
 // QR code error correction
@@ -144,7 +149,7 @@ pub fn construct_codewords(
 }
 
 #[cfg(test)]
-mod construct_codewords_test {
+mod construct_codewords_tests {
     use super::*;
 
     #[test]
@@ -203,7 +208,7 @@ pub fn max_allowed_errors(version: Version, ec_level: EcLevel) -> QrResult<usize
 }
 
 #[cfg(test)]
-mod max_allowed_errors_test {
+mod max_allowed_errors_tests {
     use super::*;
 
     #[test]

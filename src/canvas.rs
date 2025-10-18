@@ -2553,7 +2553,7 @@ impl Canvas {
 }
 
 #[cfg(test)]
-mod draw_codewords_test {
+mod draw_codewords_tests {
     use super::*;
 
     #[test]
