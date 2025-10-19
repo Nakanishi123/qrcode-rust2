@@ -921,7 +921,7 @@ impl Bits {
         }
 
         if self.len() < data_length {
-            const PADDING_BYTES: &[u8] = &[0b1110_1100, 0b0001_0001];
+            const PADDING_BYTES: [u8; 2] = [0b1110_1100, 0b0001_0001];
 
             self.bit_offset = 0;
             let data_bytes_length = data_length / 8;
