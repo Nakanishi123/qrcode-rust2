@@ -76,7 +76,8 @@ impl RenderCanvas for Canvas {
     }
 
     #[inline]
-    fn into_image(self) -> Self::Image {
+    fn into_image(mut self) -> Self::Image {
+        self.pic.pop();
         self.pic
     }
 }

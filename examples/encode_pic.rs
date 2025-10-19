@@ -103,6 +103,6 @@ fn main() -> anyhow::Result<()> {
 
     let image = code.render::<Color>().build();
 
-    print!("{image}");
+    println!("{image}");
     Ok(())
 }
