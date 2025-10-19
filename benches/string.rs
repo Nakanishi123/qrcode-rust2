@@ -10,21 +10,6 @@ use qrcode2::QrCode;
 use test::Bencher;
 
 #[bench]
-fn new(b: &mut Bencher) {
-    b.iter(|| QrCode::new(b"01234567").unwrap());
-}
-
-#[bench]
-fn new_micro(b: &mut Bencher) {
-    b.iter(|| QrCode::new_micro(b"01234567").unwrap());
-}
-
-#[bench]
-fn new_rect_micro(b: &mut Bencher) {
-    b.iter(|| QrCode::new_rect_micro(b"01234567").unwrap());
-}
-
-#[bench]
 fn render_normal(b: &mut Bencher) {
     let code = QrCode::new(b"01234567").unwrap();
     b.iter(|| code.render::<char>().module_dimensions(2, 1).build());
