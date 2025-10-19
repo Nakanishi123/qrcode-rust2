@@ -6,8 +6,10 @@
 
 #![cfg(feature = "image")]
 
-use image::{Luma, Rgb};
-use qrcode2::{EcLevel, QrCode, Version};
+use qrcode2::{
+    EcLevel, QrCode, Version,
+    image::{Luma, Rgb},
+};
 
 #[test]
 fn test_annex_i_qr_as_image() {

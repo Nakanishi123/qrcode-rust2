@@ -16,6 +16,10 @@ project adheres to https://semver.org/[Semantic Versioning].
 
 == {compare-url}/v0.15.0\...HEAD[Unreleased]
 
+=== Added
+
+* Add benchmarks ({pull-request-url}/22[#22])
+
 === Changed
 
 * Remove trailing LF from output PIC images ({pull-request-url}/21[#21])
