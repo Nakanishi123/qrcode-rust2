@@ -336,7 +336,8 @@ impl Bits {
     /// the following binary data. After calling this method, one could call
     /// [`Bits::push_byte_data`] or similar methods to insert the actual data.
     ///
-    /// The full list of ECI designator values can be found from <https://en.wikipedia.org/wiki/Extended_Channel_Interpretation>.
+    /// The full list of ECI designator values can be found from
+    /// <https://en.wikipedia.org/wiki/Extended_Channel_Interpretation>.
     ///
     /// # Errors
     ///
