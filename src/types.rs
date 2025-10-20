@@ -103,12 +103,13 @@ impl Not for Color {
 
 /// The error correction level. It allows the original information be recovered
 /// even if parts of the code is damaged.
-#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 pub enum EcLevel {
     /// Low error correction. Allows up to 7% of wrong blocks.
     L = 0,
 
     /// Medium error correction (default). Allows up to 15% of wrong blocks.
+    #[default]
     M = 1,
 
     /// "Quartile" error correction. Allows up to 25% of wrong blocks.
@@ -116,6 +117,16 @@ pub enum EcLevel {
 
     /// High error correction. Allows up to 30% of wrong blocks.
     H = 3,
+}
+
+#[cfg(test)]
+mod ec_level_tests {
+    use super::*;
+
+    #[test]
+    fn test_default() {
+        assert_eq!(EcLevel::default(), EcLevel::M);
+    }
 }
 
 // Version

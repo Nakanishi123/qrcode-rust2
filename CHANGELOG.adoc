@@ -14,6 +14,16 @@ All notable changes to this project will be documented in this file.
 The format is based on https://keepachangelog.com/[Keep a Changelog], and this
 project adheres to https://semver.org/[Semantic Versioning].
 
+== {compare-url}/v0.16.0\...HEAD[Unreleased]
+
+=== Added
+
+* Implement `Default` for `EcLevel` ({pull-request-url}/30[#30])
+
+=== Fixed
+
+* Fix invalid QR code being generated ({pull-request-url}/27[#27])
+
 == {compare-url}/v0.15.0\...v0.16.0[0.16.0] - 2025-10-19
 
 === Added
