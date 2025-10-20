@@ -49,3 +49,38 @@ fn test_annex_i_rmqr_as_image() {
     assert_eq!(image.dimensions(), expected.dimensions());
     assert_eq!(image.into_raw(), expected.into_raw());
 }
+
+#[test]
+fn test_qr_v40_ec_h_as_image() {
+    let code = QrCode::with_version(b"01234567", Version::Normal(40), EcLevel::H).unwrap();
+    let image = code.render::<Luma<u8>>().build();
+    let expected = image::load_from_memory(include_bytes!("data/test_qr_v40_ec_h_as_image.png"))
+        .unwrap()
+        .into_luma8();
+    assert_eq!(image.dimensions(), expected.dimensions());
+    assert_eq!(image.into_raw(), expected.into_raw());
+}
+
+#[test]
+fn test_micro_qr_v4_ec_q_as_image() {
+    let code = QrCode::with_version(b"01234567", Version::Micro(4), EcLevel::Q).unwrap();
+    let image = code.render::<Luma<u8>>().build();
+    let expected =
+        image::load_from_memory(include_bytes!("data/test_micro_qr_v4_ec_q_as_image.png"))
+            .unwrap()
+            .into_luma8();
+    assert_eq!(image.dimensions(), expected.dimensions());
+    assert_eq!(image.into_raw(), expected.into_raw());
+}
+
+#[test]
+fn test_rmqr_vr17x139_ec_h_as_image() {
+    let code = QrCode::with_version(b"01234567", Version::RectMicro(17, 139), EcLevel::H).unwrap();
+    let image = code.render::<Luma<u8>>().build();
+    let expected =
+        image::load_from_memory(include_bytes!("data/test_rmqr_vr17x139_ec_h_as_image.png"))
+            .unwrap()
+            .into_luma8();
+    assert_eq!(image.dimensions(), expected.dimensions());
+    assert_eq!(image.into_raw(), expected.into_raw());
+}
