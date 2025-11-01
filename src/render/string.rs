@@ -31,7 +31,7 @@ pub trait Element: Copy {
     fn default_color(color: Color) -> Self;
 
     /// Returns the number of bytes in `self`.
-    fn strlen(self) -> usize;
+    fn str_len(self) -> usize;
 
     /// Appends `self` to the end of the given `string`.
     fn append_to_string(self, string: &mut String);
@@ -44,7 +44,7 @@ impl Element for char {
     }
 
     #[inline]
-    fn strlen(self) -> usize {
+    fn str_len(self) -> usize {
         self.len_utf8()
     }
 
@@ -61,7 +61,7 @@ impl Element for &str {
     }
 
     #[inline]
-    fn strlen(self) -> usize {
+    fn str_len(self) -> usize {
         self.len()
     }
 
@@ -104,8 +104,8 @@ impl<P: Element> RenderCanvas for Canvas<P> {
         let width = width.as_usize();
         let height = height.as_isize();
         let buffer = vec![light_pixel; width * height.as_usize()];
-        let dark_cap = dark_pixel.strlen().as_isize();
-        let light_cap = light_pixel.strlen().as_isize();
+        let dark_cap = dark_pixel.str_len().as_isize();
+        let light_cap = light_pixel.str_len().as_isize();
         let dark_cap_inc = dark_cap - light_cap;
         let capacity = light_cap * width.as_isize() * height + (height - 1);
         Self {
