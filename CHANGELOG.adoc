@@ -33,6 +33,8 @@ project adheres to https://semver.org/[Semantic Versioning].
 
 * Add missing MicroQR V3/L case to `is_half_codeword_at_end`
   ({pull-request-url}/36[#36])
+* Use `saturating_sub` to prevent panic in padding calculation
+  ({pull-request-url}/39[#39])
 
 == {compare-url}/v0.16.0\...v0.16.1[0.16.1] - 2025-10-20
 
