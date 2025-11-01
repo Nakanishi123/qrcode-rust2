@@ -416,7 +416,7 @@ impl QrCode {
     #[must_use]
     pub fn to_debug_str(&self, on_char: char, off_char: char) -> String {
         self.render()
-            .quiet_zone(false)
+            .has_quiet_zone(false)
             .dark_color(on_char)
             .light_color(off_char)
             .build()
@@ -455,7 +455,7 @@ impl QrCode {
     ///     .render::<Rgb<u8>>()
     ///     .dark_color(Rgb([0, 0, 128]))
     ///     .light_color(Rgb([224, 224, 224]))
-    ///     .quiet_zone(false)
+    ///     .has_quiet_zone(false)
     ///     .min_dimensions(300, 300)
     ///     .build();
     ///

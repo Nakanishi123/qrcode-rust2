@@ -153,7 +153,7 @@ impl<'a, P: Pixel> Renderer<'a, P> {
 
     /// Sets whether to include the quiet zone in the generated image.
     #[inline]
-    pub const fn quiet_zone(&mut self, has_quiet_zone: bool) -> &mut Self {
+    pub const fn has_quiet_zone(&mut self, has_quiet_zone: bool) -> &mut Self {
         self.has_quiet_zone = has_quiet_zone;
         self
     }
