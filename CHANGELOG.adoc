@@ -23,6 +23,16 @@ project adheres to https://semver.org/[Semantic Versioning].
 === Changed
 
 * Make `Bits::push_number_checked` public ({pull-request-url}/34[#34])
+* Rename `Element::strlen` to `Element::str_len` ({pull-request-url}/38[#38])
+* Rename `Renderer::quiet_zone` to `Renderer::has_quiet_zone`
+  ({pull-request-url}/38[#38])
+* Rename `Renderer::quiet_zone_size` to `Renderer::quiet_zone`
+  ({pull-request-url}/38[#38])
+
+=== Fixed
+
+* Add missing MicroQR V3/L case to `is_half_codeword_at_end`
+  ({pull-request-url}/36[#36])
 
 == {compare-url}/v0.16.0\...v0.16.1[0.16.1] - 2025-10-20
 
