@@ -281,7 +281,7 @@ impl Version {
     #[must_use]
     #[inline]
     pub const fn is_normal(self) -> bool {
-        matches!(self, Self::Normal(version) if version >= 1 && version <= 40)
+        matches!(self, Self::Normal(v) if v >= 1 && v <= 40)
     }
 
     /// Checks whether is version refers to a Micro QR code.
@@ -302,7 +302,7 @@ impl Version {
     #[must_use]
     #[inline]
     pub const fn is_micro(self) -> bool {
-        matches!(self, Self::Micro(version) if version >= 1 && version <= 4)
+        matches!(self, Self::Micro(v) if v >= 1 && v <= 4)
     }
 
     /// Checks whether is version refers to a rMQR code.
