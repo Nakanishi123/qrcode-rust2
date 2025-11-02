@@ -24,7 +24,7 @@ fn test_annex_i_qr_as_image() {
 
 #[test]
 fn test_annex_i_micro_qr_as_image() {
-    let code = QrCode::with_version(b"01234567", Version::Micro(2), EcLevel::L).unwrap();
+    let code = QrCode::new_micro(b"01234567").unwrap();
     let image = code
         .render()
         .min_dimensions(200, 200)
@@ -41,7 +41,7 @@ fn test_annex_i_micro_qr_as_image() {
 
 #[test]
 fn test_annex_i_rmqr_as_image() {
-    let code = QrCode::with_version(b"01234567", Version::RectMicro(15, 43), EcLevel::M).unwrap();
+    let code = QrCode::new_rect_micro(b"01234567").unwrap();
     let image = code.render::<Luma<u8>>().build();
     let expected = image::load_from_memory(include_bytes!("data/test_annex_i_rmqr_as_image.png"))
         .unwrap()
